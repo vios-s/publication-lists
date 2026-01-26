@@ -19,6 +19,7 @@ class ListGenerator:
         self.people = []
         self.group_config = {}
         self.publications = {}
+        self.discovered_orcids = {}
 
         if polite_pool_email is None:
             polite_pool_email = os.getenv("OPENALEX_EMAIL")
@@ -225,6 +226,7 @@ class ListGenerator:
 
                 if orcid:
                     print(f"    ⚠️  Consider adding this ORCID to people.yaml: {orcid}")
+                    self.discovered_orcids[name] = orcid
                 else:
                     print("    ⚠️  Falling back to name search (less reliable)")
 
@@ -284,6 +286,17 @@ class ListGenerator:
 
         members_by_name = {member.get("name"): member for member in self.people}
 
+        members_by_orcid = {}
+        for member in self.people:
+            orcid = member.get("orcid")
+            if orcid:
+                members_by_orcid[orcid] = member
+
+        for name, orcid in self.discovered_orcids.items():
+            member = members_by_name.get(name)
+            if member:
+                members_by_orcid[orcid] = member
+
         for group_name in self.group_config.keys():
             removed_count = 0
 
@@ -294,13 +307,54 @@ class ListGenerator:
                     authors = paper.get("authors", [])
 
                     required_collabs = set()
-                    for author in authors:
-                        member = members_by_name.get(author)
+                    group_settings = self.group_config.get(group_name, {})
+                    required_collabs.update(group_settings.get("required_collaborators", []))
+
+                    authorships = paper.get("raw_data", {}).get("authorships", [])
+
+                    for authorship in authorships:
+                        author_info = authorship.get("author", {})
+                        author_name = author_info.get("display_name", "")
+                        author_orcid = (author_info.get("orcid") or "").replace(
+                            "https://orcid.org/", ""
+                        )
+
+                        member = None
+
+                        # Priority 1: Match by ORCID (most reliable)
+                        if author_orcid and author_orcid in members_by_orcid:
+                            candidate = members_by_orcid[author_orcid]
+                            if group_name in candidate.get("groups", []):
+                                member = candidate
+
+                        # Priority 2: Exact name match
+                        if not member:
+                            candidate = members_by_name.get(author_name)
+                            if candidate and group_name in candidate.get("groups", []):
+                                member = candidate
+
+                        # Priority 3: Fuzzy name match (fallback)
+                        if not member:
+                            for member_name, member_data in members_by_name.items():
+                                if group_name not in member_data.get("groups", []):
+                                    continue
+
+                                # Simple fuzzy match: check if core name parts match
+                                author_parts = set(
+                                    author_name.lower().replace(".", "").split()
+                                )
+                                member_parts = set(
+                                    member_name.lower().replace(".", "").split()
+                                )
+
+                                # If member name parts are a subset of author parts
+                                if member_parts.issubset(author_parts):
+                                    member = member_data
+                                    break
+
                         if member and group_name in member.get("groups", []):
                             required_collabs.update(
-                                self.get_required_collaborators_for_member(
-                                    member, group_name
-                                )
+                                member.get("required_collaborators", [])
                             )
 
                     if required_collabs:

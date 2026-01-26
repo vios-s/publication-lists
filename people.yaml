@@ -13,8 +13,9 @@ members:
       - CHAI
       - VIOS
     orcid: "0000-0002-2281-9418"
-    scholar_id: "nWQX_0AAAAAJ"
     openalex_id: "a5008578775"
+    required_collaborators:
+      - "Sotirios A. Tsaftaris"
     
   - name: "Danilo Bueno"
     groups:
@@ -36,4 +37,3 @@ members:
     groups:
       - CHAI
     orcid: "0000-0002-6195-5658"
-    scholar_id: "a5028172491"
