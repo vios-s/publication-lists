@@ -119,11 +119,14 @@ members:
     # Optional fields:
     institution: "University Name"
     openalex_id: "a1234567890"
+    required_collaborators:  # Optional: additional requirements beyond group-level
+      - "Specific Collaborator Name"
 ```
 
 **Groups Configuration:**
 - Define required collaborators per group
 - Papers without a required collaborator won't appear in that group's output
+- Empty list `[]` means no group-level requirements
 
 **Members Configuration:**
 - `name`: Required
@@ -131,6 +134,12 @@ members:
 - `orcid`: Highly recommended for accurate matching
 - `institution`: Optional, helps with ORCID lookup if ORCID not provided
 - `openalex_id`: Optional alternative to ORCID
+- `required_collaborators`: Optional, member-specific collaborator requirements (combined with group-level requirements)
+
+**Collaborator Filtering Logic:**
+- Group-level and member-level requirements are combined
+- For example, if VIOS requires ["PI Name"] and a member adds ["Advisor Name"], papers must have either collaborator
+- This allows flexible filtering where some members in a group have additional requirements beyond the group baseline
 
 ## Workflow
 
@@ -138,7 +147,7 @@ members:
 2. **Run script**: Execute `python generate_lists.py`
 3. **Review output**: Check console for ORCID suggestions and filtering results
 4. **Update config**: Add suggested ORCIDs to `people.yaml` for faster future runs
-5. **Update websites**: Copy HTML snippets to your group websites
+5. **Update websites**: Use the HTML snippets in your group websites
 
 ## Scheduling (Optional)
 

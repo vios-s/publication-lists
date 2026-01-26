@@ -265,18 +265,26 @@ class ListGenerator:
                     existing = self.publications[key]
                     existing["groups"] = list(set(existing["groups"] + paper["groups"]))
 
+    def get_required_collaborators_for_member(
+        self, member: Dict, group_name: str
+    ) -> List[str]:
+        required = set()
+
+        group_settings = self.group_config.get(group_name, {})
+        required.update(group_settings.get("required_collaborators", []))
+        required.update(member.get("required_collaborators", []))
+
+        return list(required)
+
     def filter_group_collaborators(self):
         print("\nApplying group collaborator filters...")
 
         group_removals = {}
         removed_completely = []
 
-        for group_name, group_settings in self.group_config.items():
-            required_collabs = group_settings.get("required_collaborators", [])
+        members_by_name = {member.get("name"): member for member in self.people}
 
-            if not required_collabs:
-                continue
-
+        for group_name in self.group_config.keys():
             removed_count = 0
 
             for key, paper in list(self.publications.items()):
@@ -285,17 +293,31 @@ class ListGenerator:
                 if group_name in groups:
                     authors = paper.get("authors", [])
 
-                    has_collaborator = any(
-                        collab in authors for collab in required_collabs
-                    )
+                    required_collabs = set()
+                    for author in authors:
+                        member = members_by_name.get(author)
+                        if member and group_name in member.get("groups", []):
+                            required_collabs.update(
+                                self.get_required_collaborators_for_member(
+                                    member, group_name
+                                )
+                            )
 
-                    if not has_collaborator:
-                        paper["groups"] = [group for group in groups if group != group_name]
-                        removed_count += 1
+                    if required_collabs:
+                        has_collaborator = any(
+                            collab in authors for collab in required_collabs
+                        )
 
-                        if not paper["groups"]:
-                            removed_completely.append(key)
-                            del self.publications[key]
+                        if not has_collaborator:
+                            paper["groups"] = [
+                                group for group in groups
+                                if group != group_name
+                            ]
+                            removed_count += 1
+
+                            if not paper["groups"]:
+                                removed_completely.append(key)
+                                del self.publications[key]
 
             if removed_count > 0:
                 group_removals[group_name] = removed_count
@@ -380,8 +402,11 @@ class ListGenerator:
                     publications_html += f"            <div class=\"title\">{title}"
 
                 if len(groups) > 1:
-                    for group in sorted(groups):
-                        publications_html += f"<span class=\"group-badge\">{group}</span>"
+                    for badge_group in sorted(groups):
+                        publications_html += (
+                            f"<span class=\"group-badge\">"
+                            f"{badge_group}</span>"
+                        )
 
                 publications_html += "</div>\n"
 
@@ -422,7 +447,7 @@ class ListGenerator:
 
     def run(self, current_year_only: bool = False):
         print("=" * 60)
-        print("Paper Aggregation System")
+        print("Publication Lists")
         print("=" * 60)
 
         self.load_config()
