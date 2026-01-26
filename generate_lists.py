@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 import time
 
 
-class PaperFetcher:
+class ListGenerator:
 
     def __init__(self, people_file: str, output_dir: str = "output",
                  polite_pool_email: Optional[str] = None):
@@ -453,8 +453,8 @@ def main():
     )
     args = parser.parse_args()
 
-    fetcher = PaperFetcher("people.yaml")
-    fetcher.run(current_year_only=args.current_year_only)
+    generator = ListGenerator("people.yaml")
+    generator.run(current_year_only=args.current_year_only)
 
 
 if __name__ == "__main__":

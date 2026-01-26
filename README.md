@@ -1,19 +1,17 @@
-# Paper Aggregation System
+# Publication Lists
 
 Automated publication fetching system for research group websites.
 
 ## Overview
 
-This tool fetches publications for group members from academic APIs (OpenAlex), deduplicates them, applies group-specific collaborator filters, and generates ready-to-use HTML snippets for group websites. The system is **group-agnostic** - easily add new research groups by simply editing the configuration file.
+This tool fetches publications for group members from academic APIs (OpenAlex), deduplicates them, applies group-specific collaborator filters, and generates HTML snippets for group websites.
 
 ## Setup
 
 1. Create and activate a virtual environment (recommended):
 ```bash
 python -m venv .venv
-source .venv/bin/activate  # On Linux/Mac
-# or
-.venv\Scripts\activate  # On Windows
+source .venv/bin/activate
 ```
 
 2. Install dependencies:
@@ -43,10 +41,10 @@ Run the script:
 
 ```bash
 # Fetch all publications (default)
-python fetch_papers.py
+python generate_lists.py
 
-# Fetch only current year publications (faster, for weekly updates)
-python fetch_papers.py --current-year-only
+# Fetch only current year publications
+python generate_lists.py --current-year-only
 ```
 
 This will generate files in the `output/` directory:
@@ -55,18 +53,17 @@ This will generate files in the `output/` directory:
 
 ### Options
 
-- `--current-year-only`: Fetch only publications from the current year (2026). Useful for weekly updates to reduce API load and runtime.
+- `--current-year-only`: Fetch only publications from the current year. Useful for periodic updates to reduce API load and runtime.
 
 ## Adding a New Group
 
-Adding a new research group is simple - **no code changes required**:
+Adding a new research group is simple:
 
 1. **Add group configuration** to `people.yaml`:
    ```yaml
    groups:
      VIOS:
-       required_collaborators:
-         - "Sotirios A. Tsaftaris"
+       required_collaborators: []
      CHAI:
        required_collaborators: []
      NewGroup:  # Your new group
@@ -97,15 +94,9 @@ The system is fully dynamic - you can add as many groups as needed without touch
 Create a `.env` file (copy from `.env.example`) to configure:
 
 ```bash
-# OpenAlex Polite Pool - Recommended for better performance
+# OpenAlex polite pool - Recommended for better performance
 OPENALEX_EMAIL=your-email@domain.com
 ```
-
-**Benefits of setting OPENALEX_EMAIL:**
-- Higher rate limits
-- Faster response times
-- Better service reliability
-- No authentication required, just an email address
 
 ### people.yaml Structure
 
@@ -141,42 +132,22 @@ members:
 - `institution`: Optional, helps with ORCID lookup if ORCID not provided
 - `openalex_id`: Optional alternative to ORCID
 
-## File Structure
-
-- **people.yaml** - Configuration file (members and groups)
-- **.env** - Environment-specific settings (email, etc.) - excluded from git
-- **.env.example** - Template for .env file
-- **fetch_papers.py** - Main script
-- **output/** - Generated files directory
-  - **publications.json** - Canonical dataset
-  - **chai_publications.html** - CHAI website snippet
-  - **vios_publications.html** - VIOS website snippet
-
 ## Workflow
 
 1. **First time setup**: Add all group members to `people.yaml`
-2. **Run script**: Execute `python fetch_papers.py`
+2. **Run script**: Execute `python generate_lists.py`
 3. **Review output**: Check console for ORCID suggestions and filtering results
 4. **Update config**: Add suggested ORCIDs to `people.yaml` for faster future runs
 5. **Update websites**: Copy HTML snippets to your group websites
 
-## Notes
-
-- OpenAlex API is free and doesn't require authentication
-- ORCID API is used for automatic ORCID discovery
-- Script is polite to APIs (includes delays between requests)
-- Papers appearing in both groups are listed in both outputs with badges
-- VIOS papers require at least one specified collaborator
-- First run may take a few minutes depending on group size
-
 ## Scheduling (Optional)
 
-To automate weekly updates, add to crontab:
+To automate updates, add to crontab:
 
 ```bash
 # Run every Monday at 2 AM - fetch all publications
-0 2 * * 1 cd /path/to/fetch-papers && python fetch_papers.py
+0 2 * * 1 cd /path/to/publication-lists && python generate_lists.py
 
 # Or fetch only current year for faster updates
-0 2 * * 1 cd /path/to/fetch-papers && python fetch_papers.py --current-year-only
+0 2 * * 1 cd /path/to/publication-lists && python generate_lists.py --current-year-only
 ```
