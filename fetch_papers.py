@@ -1,10 +1,4 @@
-#!/usr/bin/env python3
-"""
-Paper Aggregation System for CHAI and VIOS websites
-Fetches publications from multiple sources, deduplicates,
-and generates website-ready output.
-"""
-
+import argparse
 import json
 import os
 import yaml
@@ -12,42 +6,46 @@ import requests
 from typing import List, Dict, Optional
 from datetime import datetime
 from collections import defaultdict
+from dotenv import load_dotenv
 import time
 
 
 class PaperFetcher:
-    """Fetches and processes academic publications from multiple sources."""
 
-    def __init__(self, people_file: str, output_dir: str = 'output'):
+    def __init__(self, people_file: str, output_dir: str = 'output',
+                 polite_pool_email: Optional[str] = None):
         self.people_file = people_file
         self.output_dir = output_dir
         self.people = []
         self.group_config = {}  # Group-level configuration
         self.publications = {}  # DOI -> publication data
 
-        # Create output directory if it doesn't exist
+        if polite_pool_email is None:
+            polite_pool_email = os.getenv('OPENALEX_EMAIL')
+        self.polite_pool_email = polite_pool_email
+
         os.makedirs(self.output_dir, exist_ok=True)
 
     def load_config(self):
-        """Load people configuration."""
         print("Loading configuration...")
 
-        # Load people and groups
         with open(self.people_file, 'r') as f:
             config = yaml.safe_load(f)
             self.people = config.get('members', [])
             self.group_config = config.get('groups', {})
+
         print(f"  Loaded {len(self.people)} group members")
         print(f"  Loaded configuration for {len(self.group_config)} groups")
+        if self.polite_pool_email:
+            print(f"  Using polite pool email: {self.polite_pool_email}")
 
     def fetch_from_openalex(self, author_name: str,
                             orcid: Optional[str] = None,
-                            openalex_id: Optional[str] = None) -> List[Dict]:
-        """Fetch publications from OpenAlex API."""
+                            openalex_id: Optional[str] = None,
+                            from_year: Optional[int] = None) -> List[Dict]:
         papers = []
 
         try:
-            # Build query
             if orcid:
                 # ORCID is most reliable
                 url = (
@@ -69,7 +67,12 @@ class PaperFetcher:
                 )
                 strategy = "name search (fallback)"
 
-            url += "&per-page=200&mailto=your-email@domain.com"  # Polite pool
+            if from_year:
+                url += f",from_publication_date:{from_year}-01-01"
+
+            url += "&per-page=200"
+            if self.polite_pool_email:
+                url += f"&mailto={self.polite_pool_email}"
 
             print(f"    Querying OpenAlex for {author_name} using {strategy}...")
             response = requests.get(url, timeout=30)
@@ -89,12 +92,9 @@ class PaperFetcher:
         return papers
 
     def _parse_openalex_work(self, work: Dict) -> Optional[Dict]:
-        """Parse OpenAlex work into standardized format."""
         try:
-            # Extract DOI (handle None case)
             doi = (work.get('doi') or '').replace('https://doi.org/', '')
 
-            # Extract basic info
             paper = {
                 'doi': doi or None,
                 'title': work.get('title', ''),
@@ -115,7 +115,6 @@ class PaperFetcher:
             return None
 
     def _extract_venue(self, work: Dict) -> str:
-        """Extract venue/publication name from OpenAlex work."""
         # Try primary location
         primary = work.get('primary_location', {})
         if primary:
@@ -140,11 +139,9 @@ class PaperFetcher:
     def find_orcid_for_person(self, author_name: str,
                               institution_name: Optional[str] = None
                               ) -> Optional[str]:
-        """Try to find ORCID for a person using ORCID API."""
         try:
             print(f"    Attempting to find ORCID for {author_name}...")
 
-            # Parse name into components (simple approach)
             name_parts = author_name.strip().split()
             if len(name_parts) < 2:
                 print("    Cannot parse name into first/last name")
@@ -153,7 +150,6 @@ class PaperFetcher:
             given_name = name_parts[0]
             family_name = ' '.join(name_parts[1:])
 
-            # Build ORCID API query
             query_parts = [
                 f'given-names:{given_name}',
                 f'family-name:{family_name}'
@@ -190,7 +186,7 @@ class PaperFetcher:
             # Multiple matches - show options and pick first one
             elif len(results) > 1:
                 print(f"    Found {len(results)} possible matches:")
-                for i, result in enumerate(results[:3], 1):  # Show top 3
+                for i, result in enumerate(results[:3], 1):
                     orcid_uri = result.get('orcid-identifier', {}).get('uri', '')
                     orcid = orcid_uri.replace('https://orcid.org/', '')
                     print(f"      {i}. ORCID: {orcid}")
@@ -208,15 +204,16 @@ class PaperFetcher:
 
         return None
 
-    def fetch_all_publications(self):
-        """Fetch publications for all group members."""
+    def fetch_all_publications(self, from_year: Optional[int] = None):
         print("\nFetching publications...")
+        if from_year:
+            print(f"  Filtering to publications from {from_year} onwards")
 
         for person in self.people:
             name = person.get('name')
             orcid = person.get('orcid')
             openalex_id = person.get('openalex_id')
-            institution = person.get('institution')  # Optional
+            institution = person.get('institution')
             groups = person.get('groups', [])
 
             print(f"\n  Processing: {name} ({', '.join(groups)})")
@@ -231,17 +228,14 @@ class PaperFetcher:
                 else:
                     print("    ⚠️  Falling back to name search (less reliable)")
 
-            # Fetch from OpenAlex
-            papers = self.fetch_from_openalex(name, orcid, openalex_id)
+            papers = self.fetch_from_openalex(name, orcid, openalex_id, from_year)
 
-            # Add group tags to papers
             for paper in papers:
                 if 'groups' not in paper:
                     paper['groups'] = []
                 paper['groups'].extend(groups)
                 paper['groups'] = list(set(paper['groups']))  # Deduplicate
 
-            # Merge into main collection
             self._merge_papers(papers)
 
             # Be polite to APIs
@@ -250,16 +244,13 @@ class PaperFetcher:
         print(f"\nTotal unique publications collected: {len(self.publications)}")
 
     def _merge_papers(self, papers: List[Dict]):
-        """Merge papers into main collection, deduplicating by DOI."""
         for paper in papers:
             doi = paper.get('doi')
 
             if doi and doi in self.publications:
-                # Merge groups
                 existing = self.publications[doi]
                 existing['groups'] = list(set(existing['groups'] + paper['groups']))
 
-                # Keep paper with more complete data
                 if len(str(paper)) > len(str(existing)):
                     paper['groups'] = existing['groups']
                     self.publications[doi] = paper
@@ -276,18 +267,14 @@ class PaperFetcher:
                     existing['groups'] = list(set(existing['groups'] + paper['groups']))
 
     def filter_group_collaborators(self):
-        """Filter papers by group-specific collaborator requirements."""
         print("\nApplying group collaborator filters...")
 
-        # Track removals per group
         group_removals = {}
         removed_completely = []
 
-        # Process each group's collaborator requirements
         for group_name, group_settings in self.group_config.items():
             required_collabs = group_settings.get('required_collaborators', [])
 
-            # Skip if no collaborator requirements for this group
             if not required_collabs:
                 continue
 
@@ -296,21 +283,17 @@ class PaperFetcher:
             for key, paper in list(self.publications.items()):
                 groups = paper.get('groups', [])
 
-                # Only check papers tagged with this group
                 if group_name in groups:
                     authors = paper.get('authors', [])
 
-                    # Check if any required collaborator is in the author list
                     has_collaborator = any(
                         collab in authors for collab in required_collabs
                     )
 
                     if not has_collaborator:
-                        # Remove group tag
                         paper['groups'] = [g for g in groups if g != group_name]
                         removed_count += 1
 
-                        # If paper has no other groups, remove it completely
                         if not paper['groups']:
                             removed_completely.append(key)
                             del self.publications[key]
@@ -318,7 +301,6 @@ class PaperFetcher:
             if removed_count > 0:
                 group_removals[group_name] = removed_count
 
-        # Report results
         if group_removals:
             for group_name, count in group_removals.items():
                 print(
@@ -334,10 +316,8 @@ class PaperFetcher:
             print("  No papers filtered (no groups have collaborator requirements)")
 
     def generate_publications_json(self):
-        """Generate canonical publications.json file."""
         print("\nGenerating publications.json...")
 
-        # Sort by year (descending), then by title
         sorted_pubs = sorted(
             self.publications.values(),
             key=lambda p: (-(p.get('year') or 0), p.get('title', ''))
@@ -350,10 +330,8 @@ class PaperFetcher:
         print(f"  Wrote {len(sorted_pubs)} publications to {output_file}")
 
     def generate_html_outputs(self):
-        """Generate HTML snippets for CHAI and VIOS websites."""
         print("\nGenerating HTML outputs...")
 
-        # Filter publications by group
         chai_pubs = [
             p for p in self.publications.values()
             if 'CHAI' in p.get('groups', [])
@@ -363,110 +341,30 @@ class PaperFetcher:
             if 'VIOS' in p.get('groups', [])
         ]
 
-        # Sort by year descending
         chai_pubs.sort(key=lambda p: (-(p.get('year') or 0), p.get('title', '')))
         vios_pubs.sort(key=lambda p: (-(p.get('year') or 0), p.get('title', '')))
 
-        # Generate CHAI HTML
         chai_file = os.path.join(self.output_dir, 'chai_publications.html')
         self._generate_html_file(chai_file, chai_pubs, 'CHAI')
 
-        # Generate VIOS HTML
         vios_file = os.path.join(self.output_dir, 'vios_publications.html')
         self._generate_html_file(vios_file, vios_pubs, 'VIOS')
 
     def _generate_html_file(self, filename: str,
                             publications: List[Dict], group: str):
-        """Generate HTML file for a specific group."""
-        html = f"""<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{group} Publications</title>
-    <style>
-        body {{
-            font-family: -apple-system, BlinkMacSystemFont,
-                         'Segoe UI', Roboto, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }}
-        .publication {{
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #eee;
-        }}
-        .publication:last-child {{
-            border-bottom: none;
-        }}
-        .title {{
-            font-size: 1.1em;
-            font-weight: 600;
-            color: #2c3e50;
-            margin-bottom: 8px;
-        }}
-        .title a {{
-            color: #2c3e50;
-            text-decoration: none;
-        }}
-        .title a:hover {{
-            color: #3498db;
-            text-decoration: underline;
-        }}
-        .authors {{
-            color: #555;
-            margin-bottom: 5px;
-        }}
-        .venue {{
-            color: #666;
-            font-style: italic;
-            margin-bottom: 5px;
-        }}
-        .meta {{
-            color: #888;
-            font-size: 0.9em;
-        }}
-        .year-section {{
-            margin-top: 40px;
-        }}
-        .year-header {{
-            font-size: 1.5em;
-            font-weight: 700;
-            color: #2c3e50;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-        }}
-        .group-badge {{
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 3px;
-            font-size: 0.8em;
-            margin-left: 10px;
-            background: #ecf0f1;
-            color: #555;
-        }}
-    </style>
-</head>
-<body>
-    <h1>{group} Publications</h1>
-    <p>Last updated: {datetime.now().strftime('%B %d, %Y')}</p>
-    <p>Total publications: {len(publications)}</p>
-"""
+        template_path = os.path.join('templates', 'publications.html')
+        with open(template_path, 'r') as f:
+            template = f.read()
 
-        # Group by year
         by_year = defaultdict(list)
         for pub in publications:
             year = pub.get('year', 'Unknown')
             by_year[year].append(pub)
 
-        # Generate sections by year
+        publications_html = ''
         for year in sorted(by_year.keys(), reverse=True):
-            html += '\n    <div class="year-section">\n'
-            html += f'        <h2 class="year-header">{year}</h2>\n'
+            publications_html += '\n    <div class="year-section">\n'
+            publications_html += f'        <h2 class="year-header">{year}</h2>\n'
 
             for pub in by_year[year]:
                 title = pub.get('title', 'Untitled')
@@ -476,32 +374,29 @@ class PaperFetcher:
                 doi = pub.get('doi', '')
                 groups = pub.get('groups', [])
 
-                html += '        <div class="publication">\n'
+                publications_html += '        <div class="publication">\n'
 
-                # Title with link
                 if url:
-                    html += (
+                    publications_html += (
                         f'            <div class="title"><a href="{url}" '
                         f'target="_blank">{title}</a>'
                     )
                 else:
-                    html += f'            <div class="title">{title}'
+                    publications_html += f'            <div class="title">{title}'
 
-                # Show both groups if paper appears in both
                 if len(groups) > 1:
                     for g in sorted(groups):
-                        html += f'<span class="group-badge">{g}</span>'
+                        publications_html += f'<span class="group-badge">{g}</span>'
 
-                html += '</div>\n'
+                publications_html += '</div>\n'
 
-                # Authors
                 if authors:
-                    html += f'            <div class="authors">{authors}</div>\n'
+                    publications_html += (
+                        f'            <div class="authors">{authors}</div>\n'
+                    )
 
-                # Venue
-                html += f'            <div class="venue">{venue}</div>\n'
+                publications_html += f'            <div class="venue">{venue}</div>\n'
 
-                # Metadata
                 meta_parts = []
                 if doi:
                     meta_parts.append(f'DOI: {doi}')
@@ -509,33 +404,35 @@ class PaperFetcher:
                     meta_parts.append(f'Citations: {pub["citation_count"]}')
 
                 if meta_parts:
-                    html += (
+                    publications_html += (
                         f'            <div class="meta">{" | ".join(meta_parts)}'
                         f'</div>\n'
                     )
 
-                html += '        </div>\n'
+                publications_html += '        </div>\n'
 
-            html += '    </div>\n'
+            publications_html += '    </div>\n'
 
-        html += """
-</body>
-</html>
-"""
+        html = template.format(
+            group=group,
+            last_updated=datetime.now().strftime('%B %d, %Y'),
+            total_publications=len(publications),
+            publications_by_year=publications_html
+        )
 
         with open(filename, 'w') as f:
             f.write(html)
 
         print(f"  Wrote {len(publications)} publications to {filename}")
 
-    def run(self):
-        """Run the complete pipeline."""
+    def run(self, current_year_only: bool = False):
         print("=" * 60)
         print("Paper Aggregation System")
         print("=" * 60)
 
         self.load_config()
-        self.fetch_all_publications()
+        from_year = datetime.now().year if current_year_only else None
+        self.fetch_all_publications(from_year)
         self.filter_group_collaborators()
         self.generate_publications_json()
         self.generate_html_outputs()
@@ -549,9 +446,20 @@ class PaperFetcher:
 
 
 def main():
-    """Main entry point."""
+    load_dotenv()
+
+    parser = argparse.ArgumentParser(
+        description='Fetch and aggregate academic publications for CHAI and VIOS groups'
+    )
+    parser.add_argument(
+        '--current-year-only',
+        action='store_true',
+        help='Fetch only publications from the current year'
+    )
+    args = parser.parse_args()
+
     fetcher = PaperFetcher('people.yaml')
-    fetcher.run()
+    fetcher.run(current_year_only=args.current_year_only)
 
 
 if __name__ == '__main__':

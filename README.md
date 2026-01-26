@@ -8,23 +8,44 @@ This tool fetches publications for group members from academic APIs (OpenAlex), 
 
 ## Setup
 
-1. Install dependencies:
+1. Create and activate a virtual environment (recommended):
+```bash
+python -m venv .venv
+source .venv/bin/activate  # On Linux/Mac
+# or
+.venv\Scripts\activate  # On Windows
+```
+
+2. Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-2. Configure group members in `people.yaml`:
-   - Add all CHAI and VIOS members
-   - Include ORCID IDs when available (most reliable)
-   - Optionally include institution names to help with ORCID lookup
-   - Script will automatically attempt ORCID lookup for members without ORCID
-   - Configure group-level collaborator requirements (e.g., VIOS requires specific co-authors)
+3. Configure environment variables (optional but recommended):
+```bash
+# Copy the example .env file and update it
+cp .env.example .env
+```
+
+4. Configure `people.yaml`:
+   - **Group members**:
+     - Add all CHAI and VIOS members
+     - Include ORCID IDs when available (most reliable)
+     - Optionally include institution names to help with ORCID lookup
+     - Script will automatically attempt ORCID lookup for members without ORCID
+   - **Group-level settings**:
+     - Configure collaborator requirements (e.g., VIOS requires specific co-authors)
 
 ## Usage
 
 Run the script:
+
 ```bash
+# Fetch all publications (default)
 python fetch_papers.py
+
+# Fetch only current year publications (faster, for weekly updates)
+python fetch_papers.py --current-year-only
 ```
 
 This will generate files in the `output/` directory:
@@ -32,9 +53,66 @@ This will generate files in the `output/` directory:
 - `chai_publications.html` - HTML snippet for CHAI website
 - `vios_publications.html` - HTML snippet for VIOS website
 
+### Options
+
+- `--current-year-only`: Fetch only publications from the current year (2026). Useful for weekly updates to reduce API load and runtime.
+
+## Configuration
+
+### Environment Variables (.env)
+
+Create a `.env` file (copy from `.env.example`) to configure:
+
+```bash
+# OpenAlex Polite Pool - Recommended for better performance
+OPENALEX_EMAIL=your-email@domain.com
+```
+
+**Benefits of setting OPENALEX_EMAIL:**
+- Higher rate limits
+- Faster response times
+- Better service reliability
+- No authentication required, just an email address
+
+### people.yaml Structure
+
+The `people.yaml` file contains two main sections:
+
+```yaml
+groups:
+  VIOS:
+    required_collaborators:
+      - "Sotirios A. Tsaftaris"
+      # Additional collaborators...
+  CHAI:
+    required_collaborators: []
+
+members:
+  - name: "Researcher Name"
+    groups:
+      - CHAI
+    orcid: "0000-0000-0000-0000"  # Recommended
+    # Optional fields:
+    institution: "University Name"
+    openalex_id: "a1234567890"
+```
+
+**Groups Configuration:**
+- Define required collaborators per group
+- Papers without a required collaborator won't appear in that group's output
+
+**Members Configuration:**
+- `name`: Required
+- `groups`: List of groups (CHAI, VIOS, or both)
+- `orcid`: Highly recommended for accurate matching
+- `institution`: Optional, helps with ORCID lookup if ORCID not provided
+- `openalex_id`: Optional alternative to ORCID
+
 ## File Structure
 
-- **people.yaml** - Group member configuration and collaborator requirements
+- **people.yaml** - Configuration file (members and groups)
+- **.env** - Environment-specific settings (email, etc.) - excluded from git
+- **.env.example** - Template for .env file
 - **fetch_papers.py** - Main script
 - **output/** - Generated files directory
   - **publications.json** - Canonical dataset
@@ -47,7 +125,7 @@ This will generate files in the `output/` directory:
 2. **Run script**: Execute `python fetch_papers.py`
 3. **Review output**: Check console for ORCID suggestions and filtering results
 4. **Update config**: Add suggested ORCIDs to `people.yaml` for faster future runs
-5. **Update websites**: Copy HTML snippets to CHAI (Squarespace) and VIOS sites
+5. **Update websites**: Copy HTML snippets to CHAI and VIOS websites
 
 ## Notes
 
@@ -61,7 +139,11 @@ This will generate files in the `output/` directory:
 ## Scheduling (Optional)
 
 To automate weekly updates, add to crontab:
+
 ```bash
-# Run every Monday at 9 AM
-0 9 * * 1 cd /path/to/fetch-papers && python fetch_papers.py
+# Run every Monday at 2 AM - fetch all publications
+0 2 * * 1 cd /path/to/fetch-papers && python fetch_papers.py
+
+# Or fetch only current year for faster updates
+0 2 * * 1 cd /path/to/fetch-papers && python fetch_papers.py --current-year-only
 ```
