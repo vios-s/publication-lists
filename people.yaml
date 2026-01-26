@@ -8,30 +8,191 @@ groups:
     required_collaborators: []
 
 members:
-  - name: "Yuyang Xue"
-    groups:
-      - CHAI
-      - VIOS
-    orcid: "0000-0002-2281-9418"
-    openalex_id: "a5008578775"
-    required_collaborators:
-      - "Sotirios A. Tsaftaris"
-    
-  - name: "Danilo Bueno"
-    groups:
-      - CHAI
-      - VIOS
-    orcid: "0009-0008-3036-7010"
-
-  - name: "Feng Chen"
+  - name: "Sotirios A. Tsaftaris"
     groups:
       - VIOS
     institution: "University of Edinburgh"
+    orcid: "0000-0002-8795-9294"
+
+  - name: "Steven McDonagh"
+    groups:
+      - VIOS
+    institution: "University of Edinburgh"
+    orcid: "0000-0001-7025-5197"
+
+  - name: "Alison O'Neil"
+    groups:
+      - VIOS
+    institution: "University of Edinburgh"
+
+  - name: "Valerio Giuffrida"
+    groups:
+      - VIOS
+    institution: "University of Nottingham"
+    orcid: "0000-0002-5232-677X"
 
   - name: "Michael Camilleri"
     groups:
       - VIOS
     institution: "University of Edinburgh"
+    orcid: "0000-0002-8619-3231"
+
+  - name: "Damian Machlanski"
+    groups:
+      - VIOS
+    institution: "University of Edinburgh"
+    orcid: "0000-0003-4819-8565"
+
+  - name: "Edward Moroshko"
+    groups:
+      - VIOS
+    institution: "University of Edinburgh"
+
+  - name: "Feng Chen"
+    groups:
+      - VIOS
+    institution: "University of Edinburgh"
+    orcid: "0000-0003-2915-599X"
+
+  - name: "Kurt Butler"
+    groups:
+      - VIOS
+    institution: "University of Edinburgh"
+    orcid: "0000-0002-1520-4909"
+
+  - name: "Panos Dimitrakopoulos"
+    groups:
+      - VIOS
+    institution: "University of Edinburgh"
+
+  - name: "Zhihua Liu"
+    groups:
+      - VIOS
+    institution: "University of Edinburgh"
+    orcid: "0000-0001-8272-8238"
+
+  - name: "Analía Cabello Cano"
+    groups:
+      - VIOS
+    institution: "University of Edinburgh"
+
+  - name: "Christopher Boland"
+    groups:
+      - VIOS
+    institution: "University of Edinburgh"
+    orcid: "0009-0004-2398-6252"
+
+  - name: "Connor Jordan"
+    groups:
+      - VIOS
+    institution: "University of Edinburgh"
+
+  - name: "Harry Brown"
+    groups:
+      - VIOS
+    institution: "University of Edinburgh"
+
+  - name: "Ilias Stogiannidis"
+    groups:
+      - VIOS
+    institution: "University of Edinburgh"
+    orcid: "0009-0005-5803-1138"
+
+  - name: "Junyu Yan"
+    groups:
+      - VIOS
+    institution: "University of Edinburgh"
+    orcid: "0009-0003-0311-5559"
+
+  - name: "Keying Guo"
+    groups:
+      - VIOS
+    institution: "University of Edinburgh"
+
+  - name: "Konstantinos Vilouras"
+    groups:
+      - VIOS
+    institution: "University of Edinburgh"
+    orcid: "0009-0003-5910-9748"
+
+  - name: "George Lansdown"
+    groups:
+      - VIOS
+    institution: "University of Edinburgh"
+
+  - name: "Madhav Agarwal"
+    groups:
+      - VIOS
+    institution: "University of Edinburgh"
+    orcid: "0000-0001-8267-1024"
+
+  - name: "Nefeli Gkouti"
+    groups:
+      - VIOS
+    institution: "National and Kapodistrian University of Athens"
+
+  - name: "Nikos Spyrou"
+    groups:
+      - VIOS
+    institution: "National and Kapodistrian University of Athens"
+    orcid: "0009-0006-9238-0224"
+
+  - name: "Odyssefs Diamantopoulos Pantaleon"
+    groups:
+      - VIOS
+    institution: "University of Edinburgh"
+    orcid: "0009-0009-0830-4512"
+
+  - name: "Raman Dutt"
+    groups:
+      - VIOS
+    institution: "University of Edinburgh"
+    orcid: "0009-0005-6908-4171"
+
+  - name: "Robert Cronshaw"
+    groups:
+      - VIOS
+    institution: "University of Edinburgh"
+
+  - name: "Thomas Melistas"
+    groups:
+      - VIOS
+    institution: "National and Kapodistrian University of Athens"
+
+  - name: "Yongcheng Yao"
+    groups:
+      - VIOS
+    institution: "University of Edinburgh"
+    orcid: "0000-0003-2754-3649"
+
+  - name: "Yuning Du"
+    groups:
+      - VIOS
+    institution: "University of Edinburgh"
+    orcid: 0009-0007-4995-5472
+
+  - name: "Yuyang Xue"
+    groups:
+      - CHAI
+      - VIOS
+    institution: "University of Edinburgh"
+    orcid: "0000-0002-2281-9418"
+    openalex_id: "a5008578775"
+    required_collaborators:
+      - "Sotirios A. Tsaftaris"
+
+  - name: "Danilo Bueno"
+    groups:
+      - CHAI
+      - VIOS
+    institution: "University of Edinburgh"
+    orcid: "0009-0008-3036-7010"
+
+  - name: "Junyi Gao"
+    groups:
+      - VIOS
+    institution: "University of Edinburgh"
+    orcid: "0000-0002-4951-8682"
 
   - name: "Fabio de Sousa Ribeiro"
     groups:

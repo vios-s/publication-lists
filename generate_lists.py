@@ -308,7 +308,9 @@ class ListGenerator:
 
                     required_collabs = set()
                     group_settings = self.group_config.get(group_name, {})
-                    required_collabs.update(group_settings.get("required_collaborators", []))
+                    required_collabs.update(
+                        group_settings.get("required_collaborators", [])
+                    )
 
                     authorships = paper.get("raw_data", {}).get("authorships", [])
 
