@@ -12,16 +12,16 @@ import time
 
 class PaperFetcher:
 
-    def __init__(self, people_file: str, output_dir: str = 'output',
+    def __init__(self, people_file: str, output_dir: str = "output",
                  polite_pool_email: Optional[str] = None):
         self.people_file = people_file
         self.output_dir = output_dir
         self.people = []
-        self.group_config = {}  # Group-level configuration
-        self.publications = {}  # DOI -> publication data
+        self.group_config = {}
+        self.publications = {}
 
         if polite_pool_email is None:
-            polite_pool_email = os.getenv('OPENALEX_EMAIL')
+            polite_pool_email = os.getenv("OPENALEX_EMAIL")
         self.polite_pool_email = polite_pool_email
 
         os.makedirs(self.output_dir, exist_ok=True)
@@ -29,10 +29,10 @@ class PaperFetcher:
     def load_config(self):
         print("Loading configuration...")
 
-        with open(self.people_file, 'r') as f:
-            config = yaml.safe_load(f)
-            self.people = config.get('members', [])
-            self.group_config = config.get('groups', {})
+        with open(self.people_file, "r") as file:
+            config = yaml.safe_load(file)
+            self.people = config.get("members", [])
+            self.group_config = config.get("groups", {})
 
         print(f"  Loaded {len(self.people)} group members")
         print(f"  Loaded configuration for {len(self.group_config)} groups")
@@ -79,7 +79,7 @@ class PaperFetcher:
             response.raise_for_status()
             data = response.json()
 
-            for work in data.get('results', []):
+            for work in data.get("results", []):
                 paper = self._parse_openalex_work(work)
                 if paper:
                     papers.append(paper)
@@ -93,22 +93,22 @@ class PaperFetcher:
 
     def _parse_openalex_work(self, work: Dict) -> Optional[Dict]:
         try:
-            doi = (work.get('doi') or '').replace('https://doi.org/', '')
+            doi = (work.get("doi") or "").replace("https://doi.org/", "")
 
             paper = {
-                'doi': doi or None,
-                'title': work.get('title', ''),
-                'year': work.get('publication_year'),
-                'authors': [author.get('author', {}).get('display_name', '')
-                            for author in work.get('authorships', [])],
-                'venue': self._extract_venue(work),
-                'url': work.get('doi') or work.get('id', ''),
-                'citation_count': work.get('cited_by_count', 0),
-                'source': 'openalex',
-                'raw_data': work
+                "doi": doi or None,
+                "title": work.get("title", ""),
+                "year": work.get("publication_year"),
+                "authors": [author.get("author", {}).get("display_name", "")
+                            for author in work.get("authorships", [])],
+                "venue": self._extract_venue(work),
+                "url": work.get("doi") or work.get("id", ""),
+                "citation_count": work.get("cited_by_count", 0),
+                "source": "openalex",
+                "raw_data": work
             }
 
-            return paper if paper['title'] else None
+            return paper if paper["title"] else None
 
         except Exception as e:
             print(f"    Warning: Failed to parse OpenAlex work: {e}")
@@ -116,25 +116,25 @@ class PaperFetcher:
 
     def _extract_venue(self, work: Dict) -> str:
         # Try primary location
-        primary = work.get('primary_location', {})
+        primary = work.get("primary_location", {})
         if primary:
-            source = primary.get('source', {})
-            if source and source.get('display_name'):
-                return source['display_name']
+            source = primary.get("source", {})
+            if source and source.get("display_name"):
+                return source["display_name"]
 
         # Try best OA location
-        best_oa = work.get('best_oa_location', {})
+        best_oa = work.get("best_oa_location", {})
         if best_oa:
-            source = best_oa.get('source', {})
-            if source and source.get('display_name'):
-                return source['display_name']
+            source = best_oa.get("source", {})
+            if source and source.get("display_name"):
+                return source["display_name"]
 
         # Try host venue (older API format)
-        host = work.get('host_venue', {})
-        if host and host.get('display_name'):
-            return host['display_name']
+        host = work.get("host_venue", {})
+        if host and host.get("display_name"):
+            return host["display_name"]
 
-        return 'Unknown Venue'
+        return "Unknown Venue"
 
     def find_orcid_for_person(self, author_name: str,
                               institution_name: Optional[str] = None
@@ -148,28 +148,28 @@ class PaperFetcher:
                 return None
 
             given_name = name_parts[0]
-            family_name = ' '.join(name_parts[1:])
+            family_name = " ".join(name_parts[1:])
 
             query_parts = [
-                f'given-names:{given_name}',
-                f'family-name:{family_name}'
+                f"given-names:{given_name}",
+                f"family-name:{family_name}"
             ]
 
             if institution_name:
-                query_parts.append(f'affiliation-org-name:"{institution_name}"')
+                query_parts.append(f"affiliation-org-name:\"{institution_name}\"")
 
-            query = '+AND+'.join(query_parts)
+            query = "+AND+".join(query_parts)
             url = f"https://pub.orcid.org/v3.0/search/?q={query}&rows=5"
 
             headers = {
-                'Accept': 'application/json'
+                "Accept": "application/json"
             }
 
             response = requests.get(url, headers=headers, timeout=30)
             response.raise_for_status()
             data = response.json()
 
-            results = data.get('result', [])
+            results = data.get("result", [])
 
             if not results:
                 print(f"    No ORCID found for {author_name}")
@@ -177,8 +177,8 @@ class PaperFetcher:
 
             # If we have exactly one match, use it
             if len(results) == 1:
-                orcid_uri = results[0].get('orcid-identifier', {}).get('uri', '')
-                orcid = orcid_uri.replace('https://orcid.org/', '')
+                orcid_uri = results[0].get("orcid-identifier", {}).get("uri", "")
+                orcid = orcid_uri.replace("https://orcid.org/", "")
                 if orcid:
                     print(f"    Found ORCID: {orcid}")
                     return orcid
@@ -187,14 +187,14 @@ class PaperFetcher:
             elif len(results) > 1:
                 print(f"    Found {len(results)} possible matches:")
                 for i, result in enumerate(results[:3], 1):
-                    orcid_uri = result.get('orcid-identifier', {}).get('uri', '')
-                    orcid = orcid_uri.replace('https://orcid.org/', '')
+                    orcid_uri = result.get("orcid-identifier", {}).get("uri", "")
+                    orcid = orcid_uri.replace("https://orcid.org/", "")
                     print(f"      {i}. ORCID: {orcid}")
 
                 # Pick the first match (sorted by relevance)
                 first_match = results[0]
-                orcid_uri = first_match.get('orcid-identifier', {}).get('uri', '')
-                orcid = orcid_uri.replace('https://orcid.org/', '')
+                orcid_uri = first_match.get("orcid-identifier", {}).get("uri", "")
+                orcid = orcid_uri.replace("https://orcid.org/", "")
                 if orcid:
                     print(f"    Using first match (most relevant): {orcid}")
                     return orcid
@@ -210,13 +210,13 @@ class PaperFetcher:
             print(f"  Filtering to publications from {from_year} onwards")
 
         for person in self.people:
-            name = person.get('name')
-            orcid = person.get('orcid')
-            openalex_id = person.get('openalex_id')
-            institution = person.get('institution')
-            groups = person.get('groups', [])
+            name = person.get("name")
+            orcid = person.get("orcid")
+            openalex_id = person.get("openalex_id")
+            institution = person.get("institution")
+            groups = person.get("groups", [])
 
-            print(f"\n  Processing: {name} ({', '.join(groups)})")
+            print(f"\n  Processing: {name} ({", ".join(groups)})")
 
             # Try to find ORCID if not provided
             if not orcid and not openalex_id:
@@ -231,10 +231,10 @@ class PaperFetcher:
             papers = self.fetch_from_openalex(name, orcid, openalex_id, from_year)
 
             for paper in papers:
-                if 'groups' not in paper:
-                    paper['groups'] = []
-                paper['groups'].extend(groups)
-                paper['groups'] = list(set(paper['groups']))  # Deduplicate
+                if "groups" not in paper:
+                    paper["groups"] = []
+                paper["groups"].extend(groups)
+                paper["groups"] = list(set(paper["groups"]))  # Deduplicate
 
             self._merge_papers(papers)
 
@@ -245,26 +245,25 @@ class PaperFetcher:
 
     def _merge_papers(self, papers: List[Dict]):
         for paper in papers:
-            doi = paper.get('doi')
+            doi = paper.get("doi")
 
             if doi and doi in self.publications:
                 existing = self.publications[doi]
-                existing['groups'] = list(set(existing['groups'] + paper['groups']))
+                existing["groups"] = list(set(existing["groups"] + paper["groups"]))
 
                 if len(str(paper)) > len(str(existing)):
-                    paper['groups'] = existing['groups']
+                    paper["groups"] = existing["groups"]
                     self.publications[doi] = paper
             elif doi:
                 self.publications[doi] = paper
             else:
                 # No DOI - use title+year as fallback key
-                key = f"{paper.get('title', '')}_{paper.get('year', '')}"
+                key = f"{paper.get("title", "")}_{paper.get("year", "")}"
                 if key not in self.publications:
                     self.publications[key] = paper
                 else:
-                    # Merge groups
                     existing = self.publications[key]
-                    existing['groups'] = list(set(existing['groups'] + paper['groups']))
+                    existing["groups"] = list(set(existing["groups"] + paper["groups"]))
 
     def filter_group_collaborators(self):
         print("\nApplying group collaborator filters...")
@@ -273,7 +272,7 @@ class PaperFetcher:
         removed_completely = []
 
         for group_name, group_settings in self.group_config.items():
-            required_collabs = group_settings.get('required_collaborators', [])
+            required_collabs = group_settings.get("required_collaborators", [])
 
             if not required_collabs:
                 continue
@@ -281,20 +280,20 @@ class PaperFetcher:
             removed_count = 0
 
             for key, paper in list(self.publications.items()):
-                groups = paper.get('groups', [])
+                groups = paper.get("groups", [])
 
                 if group_name in groups:
-                    authors = paper.get('authors', [])
+                    authors = paper.get("authors", [])
 
                     has_collaborator = any(
                         collab in authors for collab in required_collabs
                     )
 
                     if not has_collaborator:
-                        paper['groups'] = [g for g in groups if g != group_name]
+                        paper["groups"] = [group for group in groups if group != group_name]
                         removed_count += 1
 
-                        if not paper['groups']:
+                        if not paper["groups"]:
                             removed_completely.append(key)
                             del self.publications[key]
 
@@ -320,108 +319,104 @@ class PaperFetcher:
 
         sorted_pubs = sorted(
             self.publications.values(),
-            key=lambda p: (-(p.get('year') or 0), p.get('title', ''))
+            key=lambda p: (-(p.get("year") or 0), p.get("title", ""))
         )
 
-        output_file = os.path.join(self.output_dir, 'publications.json')
-        with open(output_file, 'w') as f:
-            json.dump(sorted_pubs, f, indent=2)
+        output_file = os.path.join(self.output_dir, "publications.json")
+        with open(output_file, "w") as file:
+            json.dump(sorted_pubs, file, indent=2)
 
         print(f"  Wrote {len(sorted_pubs)} publications to {output_file}")
 
     def generate_html_outputs(self):
         print("\nGenerating HTML outputs...")
 
-        chai_pubs = [
-            p for p in self.publications.values()
-            if 'CHAI' in p.get('groups', [])
-        ]
-        vios_pubs = [
-            p for p in self.publications.values()
-            if 'VIOS' in p.get('groups', [])
-        ]
+        for group_name in self.group_config.keys():
+            group_pubs = [
+                publication for publication in self.publications.values()
+                if group_name in publication.get("groups", [])
+            ]
 
-        chai_pubs.sort(key=lambda p: (-(p.get('year') or 0), p.get('title', '')))
-        vios_pubs.sort(key=lambda p: (-(p.get('year') or 0), p.get('title', '')))
+            group_pubs.sort(key=lambda p: (-(p.get("year") or 0), p.get("title", "")))
 
-        chai_file = os.path.join(self.output_dir, 'chai_publications.html')
-        self._generate_html_file(chai_file, chai_pubs, 'CHAI')
-
-        vios_file = os.path.join(self.output_dir, 'vios_publications.html')
-        self._generate_html_file(vios_file, vios_pubs, 'VIOS')
+            filename = os.path.join(
+                self.output_dir,
+                f"{group_name.lower()}_publications.html"
+            )
+            self._generate_html_file(filename, group_pubs, group_name)
 
     def _generate_html_file(self, filename: str,
                             publications: List[Dict], group: str):
-        template_path = os.path.join('templates', 'publications.html')
-        with open(template_path, 'r') as f:
-            template = f.read()
+        template_path = os.path.join("templates", "publications.html")
+        with open(template_path, "r") as file:
+            template = file.read()
 
         by_year = defaultdict(list)
-        for pub in publications:
-            year = pub.get('year', 'Unknown')
-            by_year[year].append(pub)
+        for publication in publications:
+            year = publication.get("year", "Unknown")
+            by_year[year].append(publication)
 
-        publications_html = ''
+        publications_html = ""
         for year in sorted(by_year.keys(), reverse=True):
-            publications_html += '\n    <div class="year-section">\n'
-            publications_html += f'        <h2 class="year-header">{year}</h2>\n'
+            publications_html += "\n    <div class=\"year-section\">\n"
+            publications_html += f"        <h2 class=\"year-header\">{year}</h2>\n"
 
-            for pub in by_year[year]:
-                title = pub.get('title', 'Untitled')
-                authors = ', '.join(pub.get('authors', []))
-                venue = pub.get('venue', 'Unknown Venue')
-                url = pub.get('url', '')
-                doi = pub.get('doi', '')
-                groups = pub.get('groups', [])
+            for publication in by_year[year]:
+                title = publication.get("title", "Untitled")
+                authors = ", ".join(publication.get("authors", []))
+                venue = publication.get("venue", "Unknown Venue")
+                url = publication.get("url", "")
+                doi = publication.get("doi", "")
+                groups = publication.get("groups", [])
 
-                publications_html += '        <div class="publication">\n'
+                publications_html += "        <div class=\"publication\">\n"
 
                 if url:
                     publications_html += (
-                        f'            <div class="title"><a href="{url}" '
-                        f'target="_blank">{title}</a>'
+                        f"            <div class=\"title\"><a href=\"{url}\" "
+                        f"target=\"_blank\">{title}</a>"
                     )
                 else:
-                    publications_html += f'            <div class="title">{title}'
+                    publications_html += f"            <div class=\"title\">{title}"
 
                 if len(groups) > 1:
-                    for g in sorted(groups):
-                        publications_html += f'<span class="group-badge">{g}</span>'
+                    for group in sorted(groups):
+                        publications_html += f"<span class=\"group-badge\">{group}</span>"
 
-                publications_html += '</div>\n'
+                publications_html += "</div>\n"
 
                 if authors:
                     publications_html += (
-                        f'            <div class="authors">{authors}</div>\n'
+                        f"            <div class=\"authors\">{authors}</div>\n"
                     )
 
-                publications_html += f'            <div class="venue">{venue}</div>\n'
+                publications_html += f"            <div class=\"venue\">{venue}</div>\n"
 
                 meta_parts = []
                 if doi:
-                    meta_parts.append(f'DOI: {doi}')
-                if pub.get('citation_count'):
-                    meta_parts.append(f'Citations: {pub["citation_count"]}')
+                    meta_parts.append(f"DOI: {doi}")
+                if publication.get("citation_count"):
+                    meta_parts.append(f"Citations: {publication['citation_count']}")
 
                 if meta_parts:
                     publications_html += (
-                        f'            <div class="meta">{" | ".join(meta_parts)}'
-                        f'</div>\n'
+                        f"            <div class=\"meta\">{' | '.join(meta_parts)}"
+                        f"</div>\n"
                     )
 
-                publications_html += '        </div>\n'
+                publications_html += "        </div>\n"
 
-            publications_html += '    </div>\n'
+            publications_html += "    </div>\n"
 
         html = template.format(
             group=group,
-            last_updated=datetime.now().strftime('%B %d, %Y'),
+            last_updated=datetime.now().strftime("%B %d, %Y"),
             total_publications=len(publications),
             publications_by_year=publications_html
         )
 
-        with open(filename, 'w') as f:
-            f.write(html)
+        with open(filename, "w") as file:
+            file.write(html)
 
         print(f"  Wrote {len(publications)} publications to {filename}")
 
@@ -440,8 +435,8 @@ class PaperFetcher:
         print("\n" + "=" * 60)
         print(f"Done! Generated files in '{self.output_dir}/' directory:")
         print("  - publications.json (canonical data)")
-        print("  - chai_publications.html")
-        print("  - vios_publications.html")
+        for group_name in self.group_config.keys():
+            print(f"  - {group_name.lower()}_publications.html")
         print("=" * 60)
 
 
@@ -449,18 +444,18 @@ def main():
     load_dotenv()
 
     parser = argparse.ArgumentParser(
-        description='Fetch and aggregate academic publications for CHAI and VIOS groups'
+        description="Fetch and aggregate academic publications for research groups"
     )
     parser.add_argument(
-        '--current-year-only',
-        action='store_true',
-        help='Fetch only publications from the current year'
+        "--current-year-only",
+        action="store_true",
+        help="Fetch only publications from the current year"
     )
     args = parser.parse_args()
 
-    fetcher = PaperFetcher('people.yaml')
+    fetcher = PaperFetcher("people.yaml")
     fetcher.run(current_year_only=args.current_year_only)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

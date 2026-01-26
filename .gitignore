@@ -1,20 +1,5 @@
-# Output directory
 output/
-
-# Environment variables
 .env
-
-# Python
 __pycache__/
-*.pyc
-*.pyo
-*.egg-info/
-.Python
 .venv/
-env/
-
-# IDE
 .vscode/
-.idea/
-*.swp
-*.swo

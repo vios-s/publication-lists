@@ -1,10 +1,10 @@
 # Paper Aggregation System
 
-Automated publication fetching system for CHAI and VIOS group websites.
+Automated publication fetching system for research group websites.
 
 ## Overview
 
-This tool fetches publications for group members from academic APIs (OpenAlex), deduplicates them, applies group-specific collaborator filters, and generates ready-to-use HTML snippets for both websites.
+This tool fetches publications for group members from academic APIs (OpenAlex), deduplicates them, applies group-specific collaborator filters, and generates ready-to-use HTML snippets for group websites. The system is **group-agnostic** - easily add new research groups by simply editing the configuration file.
 
 ## Setup
 
@@ -29,12 +29,13 @@ cp .env.example .env
 
 4. Configure `people.yaml`:
    - **Group members**:
-     - Add all CHAI and VIOS members
+     - Add all group members (from any research group)
      - Include ORCID IDs when available (most reliable)
      - Optionally include institution names to help with ORCID lookup
      - Script will automatically attempt ORCID lookup for members without ORCID
    - **Group-level settings**:
      - Configure collaborator requirements (e.g., VIOS requires specific co-authors)
+     - Add new groups easily - just add them to the `groups` section
 
 ## Usage
 
@@ -50,12 +51,44 @@ python fetch_papers.py --current-year-only
 
 This will generate files in the `output/` directory:
 - `publications.json` - Canonical dataset (single source of truth)
-- `chai_publications.html` - HTML snippet for CHAI website
-- `vios_publications.html` - HTML snippet for VIOS website
+- `{group}_publications.html` - HTML snippet for each configured group (e.g., `chai_publications.html`, `vios_publications.html`)
 
 ### Options
 
 - `--current-year-only`: Fetch only publications from the current year (2026). Useful for weekly updates to reduce API load and runtime.
+
+## Adding a New Group
+
+Adding a new research group is simple - **no code changes required**:
+
+1. **Add group configuration** to `people.yaml`:
+   ```yaml
+   groups:
+     VIOS:
+       required_collaborators:
+         - "Sotirios A. Tsaftaris"
+     CHAI:
+       required_collaborators: []
+     NewGroup:  # Your new group
+       required_collaborators:
+         - "Principal Investigator Name"  # or empty list [] for no requirements
+   ```
+
+2. **Add members** to the new group:
+   ```yaml
+   members:
+     - name: "Researcher Name"
+       groups:
+         - NewGroup
+       orcid: "0000-0000-0000-0000"
+   ```
+
+3. **Run the script** - that's it! The script will automatically:
+   - Fetch publications for all NewGroup members
+   - Apply collaborator filters (if configured)
+   - Generate `newgroup_publications.html` output file
+
+The system is fully dynamic - you can add as many groups as needed without touching the code.
 
 ## Configuration
 
@@ -125,7 +158,7 @@ members:
 2. **Run script**: Execute `python fetch_papers.py`
 3. **Review output**: Check console for ORCID suggestions and filtering results
 4. **Update config**: Add suggested ORCIDs to `people.yaml` for faster future runs
-5. **Update websites**: Copy HTML snippets to CHAI and VIOS websites
+5. **Update websites**: Copy HTML snippets to your group websites
 
 ## Notes
 
