@@ -43,8 +43,8 @@ Run the script:
 # Fetch all publications (default)
 python generate_lists.py
 
-# Fetch only current year publications
-python generate_lists.py --current-year-only
+# Fetch only publications from a specific year onwards
+python generate_lists.py --from-year 2020
 ```
 
 This will generate files in the `output/` directory:
@@ -53,7 +53,7 @@ This will generate files in the `output/` directory:
 
 ### Options
 
-- `--current-year-only`: Fetch only publications from the current year. Useful for periodic updates to reduce API load and runtime.
+- `--from-year YEAR`: Fetch only publications from the specified year onwards (e.g., `--from-year 2020`). Useful for periodic updates to reduce API load and runtime, or to focus on recent work.
 
 ## Adding a New Group
 
@@ -157,6 +157,6 @@ To automate updates, add to crontab:
 # Run every Monday at 2 AM - fetch all publications
 0 2 * * 1 cd /path/to/publication-lists && python generate_lists.py
 
-# Or fetch only current year for faster updates
-0 2 * * 1 cd /path/to/publication-lists && python generate_lists.py --current-year-only
+# Or fetch only publications from 2020 onwards for faster updates
+0 2 * * 1 cd /path/to/publication-lists && python generate_lists.py --from-year 2020
 ```

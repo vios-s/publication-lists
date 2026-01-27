@@ -501,13 +501,12 @@ class ListGenerator:
 
         print(f"  Wrote {len(publications)} publications to {filename}")
 
-    def run(self, current_year_only: bool = False):
+    def run(self, from_year: Optional[int] = None):
         print("=" * 60)
         print("Publication Lists")
         print("=" * 60)
 
         self.load_config()
-        from_year = datetime.now().year if current_year_only else None
         self.fetch_all_publications(from_year)
         self.filter_group_collaborators()
         self.generate_publications_json()
@@ -528,14 +527,24 @@ def main():
         description="Fetch and aggregate academic publications for research groups"
     )
     parser.add_argument(
-        "--current-year-only",
-        action="store_true",
-        help="Fetch only publications from the current year"
+        "--from-year",
+        type=int,
+        help="Fetch only publications from this year onwards (e.g., 2020)"
     )
     args = parser.parse_args()
 
+    if args.from_year is not None:
+        current_year = datetime.now().year
+        if args.from_year > current_year:
+            parser.error(
+                f"--from-year cannot be in the future "
+                f"(current year: {current_year})"
+            )
+        if args.from_year < 1900:
+            parser.error("--from-year must be 1900 or later")
+
     generator = ListGenerator("people.yaml")
-    generator.run(current_year_only=args.current_year_only)
+    generator.run(from_year=args.from_year)
 
 
 if __name__ == "__main__":
