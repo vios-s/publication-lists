@@ -71,19 +71,32 @@ class ListGenerator:
             if from_year:
                 url += f",from_publication_date:{from_year}-01-01"
 
-            url += "&per-page=200"
+            base_url = url + "&per-page=200"
             if self.polite_pool_email:
-                url += f"&mailto={self.polite_pool_email}"
+                base_url += f"&mailto={self.polite_pool_email}"
 
             print(f"    Querying OpenAlex for {author_name} using {strategy}...")
-            response = requests.get(url, timeout=30)
-            response.raise_for_status()
-            data = response.json()
 
-            for work in data.get("results", []):
-                paper = self._parse_openalex_work(work)
-                if paper:
-                    papers.append(paper)
+            page = 1
+            while True:
+                page_url = base_url + f"&page={page}"
+                response = requests.get(page_url, timeout=30)
+                response.raise_for_status()
+                data = response.json()
+
+                results = data.get("results", [])
+                if not results:
+                    break
+
+                for work in results:
+                    paper = self._parse_openalex_work(work)
+                    if paper:
+                        papers.append(paper)
+
+                if len(results) < 200:
+                    break
+
+                page += 1
 
             print(f"    Found {len(papers)} papers from OpenAlex")
 
