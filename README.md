@@ -40,11 +40,20 @@ cp .env.example .env
 Run the script:
 
 ```bash
-# Fetch all publications (default)
+# Fetch all publications for all groups (default)
 python generate_lists.py
 
 # Fetch only publications from a specific year onwards
 python generate_lists.py --from-year 2020
+
+# Fetch publications for a specific group only
+python generate_lists.py --group VIOS
+
+# Fetch for multiple specific groups
+python generate_lists.py --group VIOS --group CHAI
+
+# Combine options
+python generate_lists.py --group CHAI --from-year 2020
 ```
 
 This will generate files in the `output/` directory:
@@ -54,6 +63,7 @@ This will generate files in the `output/` directory:
 ### Options
 
 - `--from-year YEAR`: Fetch only publications from the specified year onwards (e.g., `--from-year 2020`). Useful for periodic updates to reduce API load and runtime, or to focus on recent work.
+- `--group GROUP`: Run only for a specific group. Can be repeated for multiple groups (e.g., `--group VIOS --group CHAI`). Useful when you only need to update one group's publications.
 
 ## Adding a New Group
 
@@ -159,4 +169,7 @@ To automate updates, add to crontab:
 
 # Or fetch only publications from 2020 onwards for faster updates
 0 2 * * 1 cd /path/to/publication-lists && python generate_lists.py --from-year 2020
+
+# Or fetch for specific groups only
+0 2 * * 1 cd /path/to/publication-lists && python generate_lists.py --group VIOS --from-year 2020
 ```

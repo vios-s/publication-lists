@@ -13,13 +13,17 @@ import time
 class ListGenerator:
 
     def __init__(self, people_file: str, output_dir: str = "output",
-                 polite_pool_email: Optional[str] = None):
+                 polite_pool_email: Optional[str] = None,
+                 groups: Optional[List[str]] = None,
+                 from_year: Optional[int] = None):
         self.people_file = people_file
         self.output_dir = output_dir
         self.people = []
         self.group_config = {}
         self.publications = {}
         self.discovered_orcids = {}
+        self.selected_groups = groups
+        self.from_year = from_year
 
         if polite_pool_email is None:
             polite_pool_email = os.getenv("OPENALEX_EMAIL")
@@ -34,6 +38,29 @@ class ListGenerator:
             config = yaml.safe_load(file)
             self.people = config.get("members", [])
             self.group_config = config.get("groups", {})
+
+        if self.selected_groups:
+            invalid_groups = [
+                group for group in self.selected_groups
+                if group not in self.group_config
+            ]
+            if invalid_groups:
+                raise ValueError(
+                    "Unknown group(s): "
+                    f"{', '.join(sorted(invalid_groups))}. "
+                    "Available groups: "
+                    f"{', '.join(sorted(self.group_config.keys()))}"
+                )
+
+            self.group_config = {
+                group: self.group_config[group]
+                for group in self.selected_groups
+            }
+            self.people = [
+                person for person in self.people
+                if any(group in self.selected_groups
+                       for group in person.get("groups", []))
+            ]
 
         print(f"  Loaded {len(self.people)} group members")
         print(f"  Loaded configuration for {len(self.group_config)} groups")
@@ -514,13 +541,13 @@ class ListGenerator:
 
         print(f"  Wrote {len(publications)} publications to {filename}")
 
-    def run(self, from_year: Optional[int] = None):
+    def run(self):
         print("=" * 60)
         print("Publication Lists")
         print("=" * 60)
 
         self.load_config()
-        self.fetch_all_publications(from_year)
+        self.fetch_all_publications(self.from_year)
         self.filter_group_collaborators()
         self.generate_publications_json()
         self.generate_html_outputs()
@@ -544,6 +571,15 @@ def main():
         type=int,
         help="Fetch only publications from this year onwards (e.g., 2020)"
     )
+    parser.add_argument(
+        "--group",
+        action="append",
+        dest="groups",
+        help=(
+            "Run only for a specific group. "
+            "Repeat for multiple groups (e.g., --group VIOS --group CHAI)."
+        )
+    )
     args = parser.parse_args()
 
     if args.from_year is not None:
@@ -556,8 +592,12 @@ def main():
         if args.from_year < 1900:
             parser.error("--from-year must be 1900 or later")
 
-    generator = ListGenerator("people.yaml")
-    generator.run(from_year=args.from_year)
+    try:
+        generator = ListGenerator("people.yaml", groups=args.groups,
+                                  from_year=args.from_year)
+        generator.run()
+    except ValueError as exc:
+        parser.error(str(exc))
 
 
 if __name__ == "__main__":
