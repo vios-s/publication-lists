@@ -440,33 +440,94 @@ class ListGenerator:
             if raw_source_name:
                 return raw_source_name
 
-            pdf_url = primary_location.get("pdf_url")
-            if pdf_url:
-                return pdf_url
-
         return None
+
+    def _should_prefer_over(self, paper: Dict, existing: Dict) -> bool:
+        paper_venue = (paper.get("venue") or "").lower()
+        existing_venue = (existing.get("venue") or "").lower()
+
+        paper_is_arxiv = (
+            "arxiv" in paper_venue or "cornell university" in paper_venue
+        )
+        existing_is_arxiv = (
+            "arxiv" in existing_venue or "cornell university" in existing_venue
+        )
+
+        # Prefer non-arXiv over arXiv
+        if not paper_is_arxiv and existing_is_arxiv:
+            return True
+        if paper_is_arxiv and not existing_is_arxiv:
+            return False
+
+        # If both are arXiv or both are not, prefer more complete info
+        return len(str(paper)) > len(str(existing))
 
     def _merge_papers(self, papers: List[Dict]):
         for paper in papers:
             doi = paper.get("doi")
+            merged = False
 
+            # First, try to merge by DOI
             if doi and doi in self.publications:
                 existing = self.publications[doi]
                 existing["groups"] = list(set(existing["groups"] + paper["groups"]))
 
-                if len(str(paper)) > len(str(existing)):
+                if self._should_prefer_over(paper, existing):
                     paper["groups"] = existing["groups"]
                     self.publications[doi] = paper
-            elif doi:
-                self.publications[doi] = paper
-            else:
-                # No DOI - use title+year as fallback key
-                key = f"{paper.get("title", "")}_{paper.get("year", "")}"
-                if key not in self.publications:
-                    self.publications[key] = paper
+                merged = True
+
+            # If not merged by DOI, try to find duplicate by title
+            if not merged:
+                paper_title = paper.get("title", "")
+                paper_year = paper.get("year")
+
+                for key, existing in list(self.publications.items()):
+                    existing_title = existing.get("title", "")
+                    existing_year = existing.get("year")
+
+                    # Match if titles are identical and years match
+                    if (
+                        paper_title
+                        and existing_title
+                        and paper_title == existing_title
+                        and (
+                            paper_year == existing_year
+                            or not paper_year
+                            or not existing_year
+                        )
+                    ):
+
+                        # Merge groups
+                        existing["groups"] = list(
+                            set(existing["groups"] + paper["groups"])
+                        )
+
+                        # Replace if new paper is better (e.g., published vs arXiv)
+                        if self._should_prefer_over(paper, existing):
+                            paper["groups"] = existing["groups"]
+                            # Remove old entry and add new one
+                            del self.publications[key]
+                            # Use DOI as key if available, otherwise
+                            # title+year
+                            new_key = (
+                                doi
+                                if doi
+                                else f"{paper.get('title', '')}_{paper_year}"
+                            )
+                            self.publications[new_key] = paper
+
+                        merged = True
+                        break
+
+            # If still not merged, add as new paper
+            if not merged:
+                if doi:
+                    self.publications[doi] = paper
                 else:
-                    existing = self.publications[key]
-                    existing["groups"] = list(set(existing["groups"] + paper["groups"]))
+                    # No DOI - use title+year as fallback key
+                    key = f"{paper.get('title', '')}_{paper.get('year', '')}"
+                    self.publications[key] = paper
 
     def _generate_html_file(self, filename: str,
                             publications: List[Dict], group: str):
