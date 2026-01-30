@@ -554,7 +554,13 @@ class ListGenerator:
                 venue = publication.get("venue")
                 url = publication.get("url", "")
                 doi = publication.get("doi", "")
-                groups = publication.get("groups", [])
+
+                primary_location = publication.get("raw_data", {}).get("primary_location", {})
+                is_accepted = primary_location.get("is_accepted", False)
+                is_published = primary_location.get("is_published", False)
+
+                pub_type = publication.get("raw_data", {}).get("type", "")
+                is_preprint = pub_type == "preprint"
 
                 publications_html += "        <div class=\"publication\">\n"
 
@@ -566,12 +572,12 @@ class ListGenerator:
                 else:
                     publications_html += f"            <div class=\"title\">{title}"
 
-                if len(groups) > 1:
-                    for badge_group in sorted(groups):
-                        publications_html += (
-                            f"<span class=\"group-badge\">"
-                            f"{badge_group}</span>"
-                        )
+                if is_accepted:
+                    publications_html += ' <span class="badge badge-accepted">Accepted</span>'
+                if is_published:
+                    publications_html += ' <span class="badge badge-published">Published</span>'
+                if is_preprint:
+                    publications_html += ' <span class="badge badge-preprint">Preprint</span>'
 
                 publications_html += "</div>\n"
 
