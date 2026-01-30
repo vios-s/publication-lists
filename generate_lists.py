@@ -156,26 +156,23 @@ class ListGenerator:
             return None
 
     def _extract_venue(self, work: Dict) -> str:
-        # Try primary location
-        primary = work.get("primary_location", {})
-        if primary:
-            source = primary.get("source", {})
-            if source and source.get("display_name"):
-                return source["display_name"]
+        primary_location = work.get("primary_location")
+        if primary_location:
+            source = primary_location.get("source")
+            if source:
+                display_name = source.get("display_name")
+                if display_name:
+                    return display_name
 
-        # Try best OA location
-        best_oa = work.get("best_oa_location", {})
-        if best_oa:
-            source = best_oa.get("source", {})
-            if source and source.get("display_name"):
-                return source["display_name"]
+            raw_source_name = primary_location.get("raw_source_name")
+            if raw_source_name:
+                return raw_source_name
 
-        # Try host venue (older API format)
-        host = work.get("host_venue", {})
-        if host and host.get("display_name"):
-            return host["display_name"]
+            pdf_url = primary_location.get("pdf_url")
+            if pdf_url:
+                return pdf_url
 
-        return "Unknown Venue"
+        return None
 
     def find_orcid_for_person(self, author_name: str,
                               institution_name: Optional[str] = None
@@ -435,33 +432,35 @@ class ListGenerator:
     def generate_publications_json(self):
         print("\nGenerating publications.json...")
 
-        sorted_pubs = sorted(
+        sorted_publications = sorted(
             self.publications.values(),
             key=lambda p: (-(p.get("year") or 0), p.get("title", ""))
         )
 
         output_file = os.path.join(self.output_dir, "publications.json")
         with open(output_file, "w") as file:
-            json.dump(sorted_pubs, file, indent=2)
+            json.dump(sorted_publications, file, indent=2)
 
-        print(f"  Wrote {len(sorted_pubs)} publications to {output_file}")
+        print(f"  Wrote {len(sorted_publications)} publications to {output_file}")
 
     def generate_html_outputs(self):
         print("\nGenerating HTML outputs...")
 
         for group_name in self.group_config.keys():
-            group_pubs = [
+            group_publications = [
                 publication for publication in self.publications.values()
                 if group_name in publication.get("groups", [])
             ]
 
-            group_pubs.sort(key=lambda p: (-(p.get("year") or 0), p.get("title", "")))
+            group_publications.sort(
+                key=lambda p: (-(p.get("year") or 0), p.get("title", ""))
+            )
 
             filename = os.path.join(
                 self.output_dir,
                 f"{group_name.lower()}_publications.html"
             )
-            self._generate_html_file(filename, group_pubs, group_name)
+            self._generate_html_file(filename, group_publications, group_name)
 
     def _generate_html_file(self, filename: str,
                             publications: List[Dict], group: str):
@@ -482,7 +481,7 @@ class ListGenerator:
             for publication in by_year[year]:
                 title = publication.get("title", "Untitled")
                 authors = ", ".join(publication.get("authors", []))
-                venue = publication.get("venue", "Unknown Venue")
+                venue = publication.get("venue")
                 url = publication.get("url", "")
                 doi = publication.get("doi", "")
                 groups = publication.get("groups", [])
@@ -511,7 +510,10 @@ class ListGenerator:
                         f"            <div class=\"authors\">{authors}</div>\n"
                     )
 
-                publications_html += f"            <div class=\"venue\">{venue}</div>\n"
+                if venue:
+                    publications_html += (
+                        f"            <div class=\"venue\">{venue}</div>\n"
+                    )
 
                 meta_parts = []
                 if doi:
