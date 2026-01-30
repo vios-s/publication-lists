@@ -7,6 +7,7 @@ from typing import List, Dict, Optional
 from datetime import datetime
 from collections import defaultdict
 from dotenv import load_dotenv
+from jinja2 import Environment, FileSystemLoader
 import time
 
 
@@ -531,10 +532,6 @@ class ListGenerator:
 
     def _generate_html_file(self, filename: str,
                             publications: List[Dict], group: str):
-        template_path = os.path.join("templates", "publications.html")
-        with open(template_path, "r") as file:
-            template = file.read()
-
         by_year = defaultdict(list)
         for publication in publications:
             year = publication.get("year", "Unknown")
@@ -543,75 +540,15 @@ class ListGenerator:
         for year in by_year:
             by_year[year].sort(key=self._get_date_sort_key)
 
-        publications_html = ""
-        for year in sorted(by_year.keys(), reverse=True):
-            publications_html += "\n    <div class=\"year-section\">\n"
-            publications_html += f"        <h2 class=\"year-header\">{year}</h2>\n"
+        env = Environment(loader=FileSystemLoader('templates'))
+        template = env.get_template('publications.html')
 
-            for publication in by_year[year]:
-                title = publication.get("title", "Untitled")
-                authors = ", ".join(publication.get("authors", []))
-                venue = publication.get("venue")
-                url = publication.get("url", "")
-                doi = publication.get("doi", "")
-
-                primary_location = publication.get("raw_data", {}).get("primary_location", {})
-                is_accepted = primary_location.get("is_accepted", False)
-                is_published = primary_location.get("is_published", False)
-
-                pub_type = publication.get("raw_data", {}).get("type", "")
-                is_preprint = pub_type == "preprint"
-
-                publications_html += "        <div class=\"publication\">\n"
-
-                if url:
-                    publications_html += (
-                        f"            <div class=\"title\"><a href=\"{url}\" "
-                        f"target=\"_blank\">{title}</a>"
-                    )
-                else:
-                    publications_html += f"            <div class=\"title\">{title}"
-
-                if is_accepted:
-                    publications_html += ' <span class="badge badge-accepted">Accepted</span>'
-                if is_published:
-                    publications_html += ' <span class="badge badge-published">Published</span>'
-                if is_preprint:
-                    publications_html += ' <span class="badge badge-preprint">Preprint</span>'
-
-                publications_html += "</div>\n"
-
-                if authors:
-                    publications_html += (
-                        f"            <div class=\"authors\">{authors}</div>\n"
-                    )
-
-                if venue:
-                    publications_html += (
-                        f"            <div class=\"venue\">{venue}</div>\n"
-                    )
-
-                meta_parts = []
-                if doi:
-                    meta_parts.append(f"DOI: {doi}")
-                if publication.get("citation_count"):
-                    meta_parts.append(f"Citations: {publication['citation_count']}")
-
-                if meta_parts:
-                    publications_html += (
-                        f"            <div class=\"meta\">{' | '.join(meta_parts)}"
-                        f"</div>\n"
-                    )
-
-                publications_html += "        </div>\n"
-
-            publications_html += "    </div>\n"
-
-        html = template.format(
+        html = template.render(
             group=group,
             last_updated=datetime.now().strftime("%B %d, %Y"),
             total_publications=len(publications),
-            publications_by_year=publications_html
+            years=sorted(by_year.keys(), reverse=True),
+            by_year=by_year
         )
 
         with open(filename, "w") as file:

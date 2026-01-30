@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{group} Publications</title>
+    <title>{{ group }} Publications</title>
     <style>
-        body {{
+        body {
             font-family: -apple-system, BlinkMacSystemFont,
                          'Segoe UI', Roboto, sans-serif;
             line-height: 1.6;
@@ -13,43 +13,43 @@
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
-        }}
-        .publication {{
+        }
+        .publication {
             margin-bottom: 30px;
             padding-bottom: 20px;
             border-bottom: 1px solid #eee;
-        }}
-        .publication:last-child {{
+        }
+        .publication:last-child {
             border-bottom: none;
-        }}
-        .title {{
+        }
+        .title {
             font-size: 1.1em;
             font-weight: 600;
             color: #2c3e50;
             margin-bottom: 8px;
-        }}
-        .title a {{
+        }
+        .title a {
             color: #2c3e50;
             text-decoration: none;
-        }}
-        .title a:hover {{
+        }
+        .title a:hover {
             color: #3498db;
             text-decoration: underline;
-        }}
-        .authors {{
+        }
+        .authors {
             color: #555;
             margin-bottom: 5px;
-        }}
-        .venue {{
+        }
+        .venue {
             color: #666;
             font-style: italic;
             margin-bottom: 5px;
-        }}
-        .meta {{
+        }
+        .meta {
             color: #888;
             font-size: 0.9em;
-        }}
-        .badge {{
+        }
+        .badge {
             display: inline-block;
             padding: 3px 8px;
             margin-right: 6px;
@@ -57,36 +57,83 @@
             font-weight: 600;
             border-radius: 3px;
             text-transform: uppercase;
-        }}
-        .badge-accepted {{
+        }
+        .badge-accepted {
             background-color: #fff3cd;
             color: #856404;
-        }}
-        .badge-published {{
+        }
+        .badge-published {
             background-color: #d4edda;
             color: #155724;
-        }}
-        .badge-preprint {{
+        }
+        .badge-preprint {
             background-color: #e7f3ff;
             color: #004085;
-        }}
-        .year-section {{
+        }
+        .year-section {
             margin-top: 40px;
-        }}
-        .year-header {{
+        }
+        .year-header {
             font-size: 1.5em;
             font-weight: 700;
             color: #2c3e50;
             border-bottom: 2px solid #3498db;
             padding-bottom: 10px;
             margin-bottom: 20px;
-        }}
+        }
     </style>
 </head>
 <body>
-    <h1>{group} Publications</h1>
-    <p>Last updated: {last_updated}</p>
-    <p>Total publications: {total_publications}</p>
-{publications_by_year}
+    <h1>{{ group }} Publications</h1>
+    <p>Last updated: {{ last_updated }}</p>
+    <p>Total publications: {{ total_publications }}</p>
+
+    {% for year in years %}
+    <div class="year-section">
+        <h2 class="year-header">{{ year }}</h2>
+
+        {% for publication in by_year[year] %}
+        <div class="publication">
+            <div class="title">
+                {% if publication.url %}
+                <a href="{{ publication.url }}" target="_blank">{{ publication.title or 'Untitled' }}</a>
+                {% else %}
+                {{ publication.title or 'Untitled' }}
+                {% endif %}
+
+                {% set primary_location = publication.raw_data.get('primary_location', {}) %}
+                {% if primary_location.get('is_accepted') %}
+                <span class="badge badge-accepted">Accepted</span>
+                {% endif %}
+                {% if primary_location.get('is_published') %}
+                <span class="badge badge-published">Published</span>
+                {% endif %}
+                {% if publication.raw_data.get('type') == 'preprint' %}
+                <span class="badge badge-preprint">Preprint</span>
+                {% endif %}
+            </div>
+
+            {% if publication.authors %}
+            <div class="authors">{{ publication.authors|join(', ') }}</div>
+            {% endif %}
+
+            {% if publication.venue %}
+            <div class="venue">{{ publication.venue }}</div>
+            {% endif %}
+
+            {% set meta_parts = [] %}
+            {% if publication.doi %}
+                {% set _ = meta_parts.append('DOI: ' ~ publication.doi) %}
+            {% endif %}
+            {% if publication.citation_count %}
+                {% set _ = meta_parts.append('Citations: ' ~ publication.citation_count|string) %}
+            {% endif %}
+            {% if meta_parts %}
+            <div class="meta">{{ meta_parts|join(' | ') }}</div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endfor %}
 </body>
 </html>
