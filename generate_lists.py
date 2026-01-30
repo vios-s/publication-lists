@@ -226,7 +226,7 @@ class ListGenerator:
 
         sorted_publications = sorted(
             self.publications.values(),
-            key=lambda p: (-(p.get("year") or 0), p.get("title", ""))
+            key=self._get_publication_sort_key
         )
 
         output_file = os.path.join(self.output_dir, "publications.json")
@@ -244,9 +244,7 @@ class ListGenerator:
                 if group_name in publication.get("groups", [])
             ]
 
-            group_publications.sort(
-                key=lambda p: (-(p.get("year") or 0), p.get("title", ""))
-            )
+            group_publications.sort(key=self._get_publication_sort_key)
 
             filename = os.path.join(
                 self.output_dir,
@@ -413,6 +411,7 @@ class ListGenerator:
                 "doi": doi or None,
                 "title": work.get("title", ""),
                 "year": work.get("publication_year"),
+                "publication_date": work.get("publication_date"),
                 "authors": [author.get("author", {}).get("display_name", "")
                             for author in work.get("authorships", [])],
                 "venue": self._extract_venue(work),
@@ -479,6 +478,9 @@ class ListGenerator:
         for publication in publications:
             year = publication.get("year", "Unknown")
             by_year[year].append(publication)
+
+        for year in by_year:
+            by_year[year].sort(key=self._get_date_sort_key)
 
         publications_html = ""
         for year in sorted(by_year.keys(), reverse=True):
@@ -549,6 +551,16 @@ class ListGenerator:
             file.write(html)
 
         print(f"  Wrote {len(publications)} publications to {filename}")
+
+    def _get_publication_sort_key(self, publication: Dict):
+        year = publication.get("year") or 0
+        date_str = publication.get("publication_date") or "0000-00-00"
+        date_int = int(date_str.replace("-", ""))
+        return (-year, -date_int)
+
+    def _get_date_sort_key(self, publication: Dict):
+        date_str = publication.get("publication_date") or "0000-00-00"
+        return -int(date_str.replace("-", ""))
 
 
 def main():
