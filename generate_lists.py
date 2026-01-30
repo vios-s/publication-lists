@@ -454,6 +454,17 @@ class ListGenerator:
             "arxiv" in existing_venue or "cornell university" in existing_venue
         )
 
+        paper_type = paper.get("raw_data", {}).get("type", "")
+        existing_type = existing.get("raw_data", {}).get("type", "")
+        paper_is_preprint = paper_type == "preprint"
+        existing_is_preprint = existing_type == "preprint"
+
+        # Prefer non-preprint over preprint
+        if not paper_is_preprint and existing_is_preprint:
+            return True
+        if paper_is_preprint and not existing_is_preprint:
+            return False
+
         # Prefer non-arXiv over arXiv
         if not paper_is_arxiv and existing_is_arxiv:
             return True
@@ -462,6 +473,12 @@ class ListGenerator:
 
         # If both are arXiv or both are not, prefer more complete info
         return len(str(paper)) > len(str(existing))
+
+    def _normalize_title(self, title: str) -> str:
+        if not title:
+            return ""
+        normalized = " ".join(title.lower().split())
+        return normalized
 
     def _merge_papers(self, papers: List[Dict]):
         for paper in papers:
@@ -480,23 +497,25 @@ class ListGenerator:
 
             # If not merged by DOI, try to find duplicate by title
             if not merged:
-                paper_title = paper.get("title", "")
+                paper_title = self._normalize_title(paper.get("title", ""))
                 paper_year = paper.get("year")
 
                 for key, existing in list(self.publications.items()):
-                    existing_title = existing.get("title", "")
+                    existing_title = self._normalize_title(existing.get("title", ""))
                     existing_year = existing.get("year")
 
-                    # Match if titles are identical and years match
+                    # Match if normalized titles match and years are close (<= 1 year)
+                    years_match = (
+                        not paper_year
+                        or not existing_year
+                        or paper_year == existing_year
+                        or abs(paper_year - existing_year) <= 1
+                    )
+
                     if (
-                        paper_title
-                        and existing_title
+                        paper_title and existing_title
                         and paper_title == existing_title
-                        and (
-                            paper_year == existing_year
-                            or not paper_year
-                            or not existing_year
-                        )
+                        and years_match
                     ):
 
                         # Merge groups
@@ -510,11 +529,12 @@ class ListGenerator:
                             # Remove old entry and add new one
                             del self.publications[key]
                             # Use DOI as key if available, otherwise
-                            # title+year
+                            # normalized title+year
                             new_key = (
                                 doi
                                 if doi
-                                else f"{paper.get('title', '')}_{paper_year}"
+                                else f"{self._normalize_title(paper.get('title', ''))}"
+                                     f"_{paper_year}"
                             )
                             self.publications[new_key] = paper
 
@@ -526,8 +546,11 @@ class ListGenerator:
                 if doi:
                     self.publications[doi] = paper
                 else:
-                    # No DOI - use title+year as fallback key
-                    key = f"{paper.get('title', '')}_{paper.get('year', '')}"
+                    # No DOI - use normalized title+year as fallback key
+                    key = (
+                        f"{self._normalize_title(paper.get('title', ''))}_"
+                        f"{paper.get('year', '')}"
+                    )
                     self.publications[key] = paper
 
     def _generate_html_file(self, filename: str,
@@ -545,7 +568,7 @@ class ListGenerator:
 
         html = template.render(
             group=group,
-            last_updated=datetime.now().strftime("%B %d, %Y"),
+            last_updated=datetime.now().strftime("%B %d, %Y at %I:%M %p"),
             total_publications=len(publications),
             years=sorted(by_year.keys(), reverse=True),
             by_year=by_year
