@@ -16,15 +16,18 @@ class ListGenerator:
     def __init__(self, people_file: str, output_dir: str = "output",
                  polite_pool_email: Optional[str] = None,
                  groups: Optional[List[str]] = None,
-                 from_year: Optional[int] = None):
+                 from_year: Optional[int] = None,
+                 exclusion_file: str = "excluded_dois.yaml"):
         self.people_file = people_file
         self.output_dir = output_dir
+        self.exclusion_file = exclusion_file
         self.people = []
         self.group_config = {}
         self.publications = {}
         self.discovered_orcids = {}
         self.selected_groups = groups
         self.from_year = from_year
+        self.excluded_dois = set()
 
         if polite_pool_email is None:
             polite_pool_email = os.getenv("OPENALEX_EMAIL")
@@ -39,6 +42,8 @@ class ListGenerator:
             config = yaml.safe_load(file)
             self.people = config.get("members", [])
             self.group_config = config.get("groups", {})
+
+        self._load_excluded_dois()
 
         if self.selected_groups:
             invalid_groups = [
@@ -408,6 +413,9 @@ class ListGenerator:
         try:
             doi = (work.get("doi") or "").replace("https://doi.org/", "")
 
+            if doi and doi.lower() in self.excluded_dois:
+                return None
+
             paper = {
                 "doi": doi or None,
                 "title": work.get("title", ""),
@@ -479,6 +487,22 @@ class ListGenerator:
             return ""
         normalized = " ".join(title.lower().split())
         return normalized
+
+    def _load_excluded_dois(self):
+        if not os.path.exists(self.exclusion_file):
+            return
+
+        try:
+            with open(self.exclusion_file, "r") as file:
+                data = yaml.safe_load(file)
+                if data and "excluded_dois" in data:
+                    self.excluded_dois = set(
+                        doi.lower() for doi in data["excluded_dois"]
+                    )
+                    print(f"  Loaded {len(self.excluded_dois)} excluded DOIs"
+                          f"from {self.exclusion_file}")
+        except Exception as e:
+            print(f"  Warning: Could not load {self.exclusion_file}: {e}")
 
     def _merge_papers(self, papers: List[Dict]):
         for paper in papers:

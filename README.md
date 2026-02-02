@@ -151,6 +151,18 @@ members:
 - For example, if VIOS requires ["PI Name"] and a member adds ["Advisor Name"], papers must have either collaborator
 - This allows flexible filtering where some members in a group have additional requirements beyond the group baseline
 
+### Exclusion List (excluded_dois.yaml)
+
+Sometimes OpenAlex may incorrectly attribute publications to authors (due to data quality issues in their database). You can exclude specific publications by adding their DOIs to the `excluded_dois.yaml` file.
+
+**How to exclude incorrect publications:**
+1. Check the generated HTML output for papers that shouldn't be there
+2. Look up the paper on OpenAlex to verify incorrect attribution
+3. Add the DOI to `excluded_dois.yaml`
+4. Re-run the script
+
+The excluded DOIs will be filtered out during publication fetching.
+
 ## Workflow
 
 1. **First time setup**: Add all group members to `people.yaml`
