@@ -57,7 +57,6 @@ python generate_lists.py --group CHAI --from-year 2020
 ```
 
 This will generate files in the `output/` directory:
-- `publications.json` - Canonical dataset (single source of truth)
 - `{group}_publications.html` - HTML snippet for each configured group (e.g., `chai_publications.html`, `vios_publications.html`)
 
 ### Options

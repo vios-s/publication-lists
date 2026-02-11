@@ -1,5 +1,4 @@
 import argparse
-import json
 import os
 import yaml
 import requests
@@ -13,7 +12,7 @@ import time
 
 class ListGenerator:
 
-    def __init__(self, people_file: str, output_dir: str = "output",
+    def __init__(self, people_file: str = "people.yaml", output_dir: str = "output",
                  polite_pool_email: Optional[str] = None,
                  groups: Optional[List[str]] = None,
                  from_year: Optional[int] = None,
@@ -227,20 +226,6 @@ class ListGenerator:
         if not group_removals and not removed_completely:
             print("  No papers filtered (no groups have collaborator requirements)")
 
-    def generate_publications_json(self):
-        print("\nGenerating publications.json...")
-
-        sorted_publications = sorted(
-            self.publications.values(),
-            key=self._get_publication_sort_key
-        )
-
-        output_file = os.path.join(self.output_dir, "publications.json")
-        with open(output_file, "w") as file:
-            json.dump(sorted_publications, file, indent=2)
-
-        print(f"  Wrote {len(sorted_publications)} publications to {output_file}")
-
     def generate_html_outputs(self):
         print("\nGenerating HTML outputs...")
 
@@ -266,12 +251,10 @@ class ListGenerator:
         self.load_config()
         self.fetch_all_publications(self.from_year)
         self.filter_group_collaborators()
-        self.generate_publications_json()
         self.generate_html_outputs()
 
         print("\n" + "=" * 60)
         print(f"Done! Generated files in '{self.output_dir}/' directory:")
-        print("  - publications.json (canonical data)")
         for group_name in self.group_config.keys():
             print(f"  - {group_name.lower()}_publications.html")
         print("=" * 60)
@@ -647,8 +630,7 @@ def main():
             parser.error("--from-year must be 1900 or later")
 
     try:
-        generator = ListGenerator("people.yaml", groups=args.groups,
-                                  from_year=args.from_year)
+        generator = ListGenerator(groups=args.groups, from_year=args.from_year)
         generator.run()
     except ValueError as exc:
         parser.error(str(exc))
