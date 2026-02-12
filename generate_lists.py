@@ -84,7 +84,7 @@ class ListGenerator:
             institution = person.get("institution")
             groups = person.get("groups", [])
 
-            print(f"\n  Processing: {name} ({", ".join(groups)})")
+            print(f"\n  Processing: {name} ({', '.join(groups)})")
 
             # Try to find ORCID if not provided
             if not orcid and not openalex_id:
