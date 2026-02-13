@@ -1,4 +1,4 @@
-name: Update tsaftarislab website publications (PR)
+name: Update VIOS website publications (PR)
 
 on:
   workflow_dispatch: {}
@@ -79,7 +79,7 @@ jobs:
             - Go to the repository: https://github.com/vios-s/publication-lists
             - Add the incorrect DOIs to `excluded_dois.yaml`.
             - Then navigate to:
-                Actions → "Update tsaftarislab website publications (PR)" → Run workflow
+                Actions → "Update VIOS website publications (PR)" → Run workflow
             - Review the updated PR again once it regenerates.
           labels: |
             publications
