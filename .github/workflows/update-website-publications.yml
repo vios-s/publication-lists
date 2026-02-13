@@ -1,0 +1,87 @@
+name: Update tsaftarislab website publications (PR)
+
+on:
+  workflow_dispatch: {}
+  # schedule:
+  #   # Every ~15 days (twice a month)
+  #   - cron: "0 2 1,16 * *"   # 02:00 UTC on the 1st and 16th
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publications-update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    env:
+      WEBSITE_REPO: "vios-s/tsaftarislab.github.io"
+      WEBSITE_BRANCH: "master"
+      UPDATE_BRANCH: "publications-update"
+      TARGET_INCLUDE_PATH: "_includes/vios_publications.html"
+      GROUP: "VIOS"
+      YEAR: 2017
+
+    steps:
+      - name: Checkout publication-lists repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Generate publications
+        env:
+          OPENALEX_EMAIL: ${{ secrets.OPENALEX_EMAIL }}
+        run: |
+          python generate_lists.py --from-year "$YEAR" --group "$GROUP"
+          test -f output/vios_publications.html
+
+      - name: Checkout website repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.WEBSITE_REPO }}
+          ref: ${{ env.WEBSITE_BRANCH }}
+          path: website
+          token: ${{ secrets.WEBSITE_REPO_PAT }}
+
+      - name: Copy generated snippet into website repo
+        run: |
+          mkdir -p "website/$(dirname "${TARGET_INCLUDE_PATH}")"
+          cp "output/vios_publications.html" "website/${TARGET_INCLUDE_PATH}"
+
+      - name: Create or update PR
+        uses: peter-evans/create-pull-request@v8
+        with:
+          path: website
+          token: ${{ secrets.WEBSITE_REPO_PAT }}
+          commit-message: "Update publications snippet (VIOS)"
+          branch: ${{ env.UPDATE_BRANCH }}
+          base: ${{ env.WEBSITE_BRANCH }}
+          title: "Update publications"
+          body: |
+            Automated update of `_includes/vios_publications.html` generated from OpenAlex.
+
+            ✅ If everything looks correct:
+            - Approve and merge this PR.
+
+            ❌ If there are incorrect publications:
+            - Do NOT merge this PR.
+            - Go to the repository: https://github.com/vios-s/publication-lists
+            - Add the incorrect DOIs to `excluded_dois.yaml`.
+            - Then navigate to:
+                Actions → "Update tsaftarislab website publications (PR)" → Run workflow
+            - Review the updated PR again once it regenerates.
+          labels: |
+            publications
+            automated
+          delete-branch: false
