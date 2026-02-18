@@ -1,186 +1,126 @@
 # Publication Lists
 
-Automated publication fetching system for research group websites.
+Automated publication fetching system for research group websites. Fetches publications from OpenAlex, deduplicates entries, applies collaborator filters, and generates HTML output.
 
-## Overview
+## Quick Start
 
-This tool fetches publications for group members from academic APIs (OpenAlex), deduplicates them, applies group-specific collaborator filters, and generates HTML snippets for group websites.
-
-## Setup
-
-1. Create and activate a virtual environment (recommended):
 ```bash
+# Install dependencies
 python -m venv .venv
 source .venv/bin/activate
-```
-
-2. Install dependencies:
-```bash
 pip install -r requirements.txt
-```
 
-3. Configure environment variables (optional but recommended):
-```bash
-# Copy the example .env file and update it
-cp .env.example .env
-```
+# Configure people.yaml with your group members
+# (Optional) Set OPENALEX_EMAIL in .env for better API performance
 
-4. Configure `people.yaml`:
-   - **Group members**:
-     - Add all group members (from any research group)
-     - Include ORCID IDs when available (most reliable)
-     - Optionally include institution names to help with ORCID lookup
-     - Script will automatically attempt ORCID lookup for members without ORCID
-   - **Group-level settings**:
-     - Configure collaborator requirements (e.g., VIOS requires specific co-authors)
-     - Add new groups easily - just add them to the `groups` section
-
-## Usage
-
-Run the script:
-
-```bash
-# Fetch all publications for all groups (default)
+# Run
 python generate_lists.py
-
-# Fetch only publications from a specific year onwards
-python generate_lists.py --from-year 2020
-
-# Fetch publications for a specific group only
-python generate_lists.py --group VIOS
-
-# Fetch for multiple specific groups
-python generate_lists.py --group VIOS --group CHAI
-
-# Combine options
-python generate_lists.py --group CHAI --from-year 2020
 ```
 
-This will generate files in the `output/` directory:
-- `{group}_publications.html` - HTML snippet for each configured group (e.g., `chai_publications.html`, `vios_publications.html`)
+Output: `output/{group}_publications.html` for each configured group.
 
-### Options
-
-- `--from-year YEAR`: Fetch only publications from the specified year onwards (e.g., `--from-year 2020`). Useful for periodic updates to reduce API load and runtime, or to focus on recent work.
-- `--group GROUP`: Run only for a specific group. Can be repeated for multiple groups (e.g., `--group VIOS --group CHAI`). Useful when you only need to update one group's publications.
-
-## Adding a New Group
-
-Adding a new research group is simple:
-
-1. **Add group configuration** to `people.yaml`:
-   ```yaml
-   groups:
-     VIOS:
-       required_collaborators: []
-     CHAI:
-       required_collaborators: []
-     NewGroup:  # Your new group
-       required_collaborators:
-         - "Principal Investigator Name"  # or empty list [] for no requirements
-   ```
-
-2. **Add members** to the new group:
-   ```yaml
-   members:
-     - name: "Researcher Name"
-       groups:
-         - NewGroup
-       orcid: "0000-0000-0000-0000"
-   ```
-
-3. **Run the script** - that's it! The script will automatically:
-   - Fetch publications for all NewGroup members
-   - Apply collaborator filters (if configured)
-   - Generate `newgroup_publications.html` output file
-
-The system is fully dynamic - you can add as many groups as needed without touching the code.
+**Usage:**
+```bash
+python generate_lists.py                          # All groups, all years
+python generate_lists.py --from-year 2020         # Recent publications only
+python generate_lists.py --group VIOS             # Specific group
+python generate_lists.py --group VIOS --group CHAI --from-year 2020
+```
 
 ## Configuration
 
-### Environment Variables (.env)
+### people.yaml
 
-Create a `.env` file (copy from `.env.example`) to configure:
-
-```bash
-# OpenAlex polite pool - Recommended for better performance
-OPENALEX_EMAIL=your-email@domain.com
-```
-
-### people.yaml Structure
-
-The `people.yaml` file contains two main sections:
+Defines groups and members:
 
 ```yaml
 groups:
   VIOS:
     required_collaborators:
-      - "Sotirios A. Tsaftaris"
-      # Additional collaborators...
+      - "Principal Investigator"  # Papers need this collaborator
   CHAI:
-    required_collaborators: []
+    required_collaborators: []    # No filtering
 
 members:
   - name: "Researcher Name"
     groups:
       - CHAI
-    orcid: "0000-0000-0000-0000"  # Recommended
-    # Optional fields:
-    institution: "University Name"
-    openalex_id: "a1234567890"
-    required_collaborators:  # Optional: additional requirements beyond group-level
-      - "Specific Collaborator Name"
+      - VIOS  # Can belong to multiple groups
+    orcid: "0000-0000-0000-0000"  # Recommended for accuracy
+    institution: "University Name"  # Optional, helps ORCID lookup
+    required_collaborators:  # Optional, additional per-member requirements
+      - "Specific Advisor"
 ```
 
-**Groups Configuration:**
-- Define required collaborators per group
-- Papers without a required collaborator won't appear in that group's output
-- Empty list `[]` means no group-level requirements
+**Key points:**
+- ORCID is highly recommended for accurate matching
+- Script auto-attempts ORCID lookup if missing
+- Collaborator requirements combine group + member level
+- Empty `required_collaborators: []` means no filtering
 
-**Members Configuration:**
-- `name`: Required
-- `groups`: List of groups (CHAI, VIOS, or both)
-- `orcid`: Highly recommended for accurate matching
-- `institution`: Optional, helps with ORCID lookup if ORCID not provided
-- `openalex_id`: Optional alternative to ORCID
-- `required_collaborators`: Optional, member-specific collaborator requirements (combined with group-level requirements)
+### manual_publications.yaml
 
-**Collaborator Filtering Logic:**
-- Group-level and member-level requirements are combined
-- For example, if VIOS requires ["PI Name"] and a member adds ["Advisor Name"], papers must have either collaborator
-- This allows flexible filtering where some members in a group have additional requirements beyond the group baseline
+Manually add publications not found in OpenAlex:
 
-### Exclusion List (excluded_dois.yaml)
+```yaml
+manual_publications:
+  - title: "Your Paper Title"
+    authors:
+      - "First Author"
+      - "Second Author"
+    year: 2024
+    groups:
+      - VIOS
+    venue: "Conference Name"  # Optional
+    doi: "10.1234/example"    # Optional
+    url: "https://..."        # Optional, used if no DOI
+```
 
-Sometimes OpenAlex may incorrectly attribute publications to authors (due to data quality issues in their database). You can exclude specific publications by adding their DOIs to the `excluded_dois.yaml` file.
+Required fields: `title`, `authors`, `year`, `groups`. All other fields are optional.
 
-**How to exclude incorrect publications:**
-1. Check the generated HTML output for papers that shouldn't be there
-2. Look up the paper on OpenAlex to verify incorrect attribution
-3. Add the DOI to `excluded_dois.yaml`
-4. Re-run the script
+### excluded_dois.yaml
 
-The excluded DOIs will be filtered out during publication fetching.
+Exclude incorrectly attributed publications:
 
-## Workflow
+```yaml
+excluded_dois:
+  - "10.1234/wrong.paper"
+  - "10.5678/another.wrong"
+```
 
-1. **First time setup**: Add all group members to `people.yaml`
-2. **Run script**: Execute `python generate_lists.py`
-3. **Review output**: Check console for ORCID suggestions and filtering results
-4. **Update config**: Add suggested ORCIDs to `people.yaml` for faster future runs
-5. **Update websites**: Use the HTML snippets in your group websites
+### .env
 
-## Scheduling (Optional)
-
-To automate updates, add to crontab:
+Optional but recommended for better API performance:
 
 ```bash
-# Run every Monday at 2 AM - fetch all publications
-0 2 * * 1 cd /path/to/publication-lists && python generate_lists.py
+OPENALEX_EMAIL=your-email@domain.com
+```
 
-# Or fetch only publications from 2020 onwards for faster updates
+## Advanced
+
+### Adding a New Group
+
+1. Add to `people.yaml`:
+```yaml
+groups:
+  NewGroup:
+    required_collaborators: []  # or add names
+```
+
+2. Tag members with the group:
+```yaml
+members:
+  - name: "Member Name"
+    groups:
+      - NewGroup
+```
+
+3. Run the script - done! Output will be `output/newgroup_publications.html`
+
+### Automation
+
+Schedule with cron:
+```bash
+# Weekly updates - fetch only recent publications
 0 2 * * 1 cd /path/to/publication-lists && python generate_lists.py --from-year 2020
-
-# Or fetch for specific groups only
-0 2 * * 1 cd /path/to/publication-lists && python generate_lists.py --group VIOS --from-year 2020
 ```
