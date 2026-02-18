@@ -34,7 +34,7 @@
         .search-container {
             top: 0;
             background: white;
-            padding: 20px 0;
+            padding: 20px 0 0 0;
             z-index: 100;
         }
         .search-box {
@@ -73,13 +73,6 @@
             background-color: #e7f3ff;
             color: #004085;
         }
-        .type-label {
-            font-size: 0.8em;
-            color: #6c757d;
-            text-transform: uppercase;
-            font-weight: 500;
-            margin-bottom: 4px;
-        }
     </style>
 </head>
 <body>
@@ -93,7 +86,7 @@
         <h2 class="year-header">{{ year }}</h2>
 
         {% for publication in by_year[year] %}
-        <div class="publication">
+        <div class="publication" data-type="{{ publication.display_type | lower }}">
             <div class="title">
                 {% if publication.url %}
                 <a href="{{ publication.url }}" target="_blank">{{ publication.title or 'Untitled' }}</a>
@@ -141,8 +134,12 @@
         const yearSections = document.querySelectorAll('.year-section');
         const totalPublications = publications.length;
 
-        searchBox.addEventListener('input', (e) => {
-            const searchTerm = e.target.value.toLowerCase().trim();
+        const typeFilters = ['journals', 'books', 'conferences', 'preprints', 'articles', 'others', 'all'];
+
+        let currentTypeFilter = null;
+        let currentSearchTerm = '';
+
+        function applyFilters() {
             let visibleCount = 0;
 
             publications.forEach(publication => {
@@ -150,13 +147,18 @@
                 const authors = publication.querySelector('.authors')?.textContent.toLowerCase() || '';
                 const venue = publication.querySelector('.venue')?.textContent.toLowerCase() || '';
                 const meta = publication.querySelector('.meta')?.textContent.toLowerCase() || '';
+                const displayType = publication.dataset.type || '';
 
-                const matches = title.includes(searchTerm) ||
-                              authors.includes(searchTerm) ||
-                              venue.includes(searchTerm) ||
-                              meta.includes(searchTerm);
+                const searchMatches = !currentSearchTerm ||
+                    title.includes(currentSearchTerm) ||
+                    authors.includes(currentSearchTerm) ||
+                    venue.includes(currentSearchTerm) ||
+                    meta.includes(currentSearchTerm);
 
-                if (matches) {
+                const typeMatches = !currentTypeFilter || currentTypeFilter === 'all' ||
+                    displayType === currentTypeFilter;
+
+                if (searchMatches && typeMatches) {
                     publication.classList.remove('hidden');
                     visibleCount++;
                 } else {
@@ -173,14 +175,44 @@
                 }
             });
 
-            totalCount.textContent = visibleCount;
-            if (searchTerm) {
-                searchInfo.textContent = `Showing ${visibleCount} of ${totalPublications} publications`;
+            if (currentSearchTerm || currentTypeFilter) {
+                let filterDesc = [];
+                if (currentTypeFilter && currentTypeFilter !== 'all') {
+                    filterDesc.push(`type: ${currentTypeFilter}`);
+                }
+                if (currentSearchTerm) {
+                    filterDesc.push(`search: "${currentSearchTerm}"`);
+                }
+                searchInfo.textContent = `Showing ${visibleCount} of ${totalPublications} publications (filtered by ${filterDesc.join(', ')})`;
             } else {
                 searchInfo.textContent = '';
-                totalCount.textContent = totalPublications;
             }
+        }
+
+        function handleHashChange() {
+            const hash = window.location.hash.substring(1).toLowerCase();
+
+            if (typeFilters.includes(hash)) {
+                currentTypeFilter = hash === 'all' ? null : hash;
+                applyFilters();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else if (hash) {
+                currentTypeFilter = null;
+                applyFilters();
+            } else {
+                currentTypeFilter = null;
+                applyFilters();
+            }
+        }
+
+        searchBox.addEventListener('input', (e) => {
+            currentSearchTerm = e.target.value.toLowerCase().trim();
+            applyFilters();
         });
+
+        window.addEventListener('hashchange', handleHashChange);
+
+        handleHashChange();
     </script>
 </body>
 </html>

@@ -399,6 +399,17 @@ class ListGenerator:
             if doi and doi.lower() in self.excluded_dois:
                 return None
 
+            work_type = work.get("type", "")
+            venue = self._extract_venue(work)
+            venue_type = None
+            primary_location = work.get("primary_location")
+            if primary_location:
+                source = primary_location.get("source")
+                if source:
+                    venue_type = source.get("type")
+
+            display_type = self._get_display_type(work_type, venue_type, venue)
+
             paper = {
                 "doi": doi or None,
                 "title": work.get("title", ""),
@@ -406,9 +417,12 @@ class ListGenerator:
                 "publication_date": work.get("publication_date"),
                 "authors": [author.get("author", {}).get("display_name", "")
                             for author in work.get("authorships", [])],
-                "venue": self._extract_venue(work),
+                "venue": venue,
                 "url": work.get("doi") or work.get("id", ""),
                 "citation_count": work.get("cited_by_count", 0),
+                "type": work_type,
+                "venue_type": venue_type,
+                "display_type": display_type,
                 "source": "openalex",
                 "raw_data": work
             }
@@ -433,6 +447,32 @@ class ListGenerator:
                 return raw_source_name
 
         return None
+
+    def _get_display_type(self, work_type: str, venue_type: Optional[str],
+                          venue: Optional[str]) -> str:
+        conference_keywords = [
+            'conference', 'convention', 'congress', 'assembly', 'colloquium',
+            'seminar', 'workshop', 'forum', 'roundtable', 'summit',
+            'retreat', 'conclave', 'symposium', 'neural information processing systems'
+        ]
+        venue_lower = (venue or "").lower()
+        is_conference_venue = any(keyword in venue_lower for keyword in
+                                  conference_keywords)
+
+        if venue_type == 'journal' and work_type == 'article':
+            return 'journals'
+        elif venue_type == 'conference' and work_type == 'article':
+            return 'conferences'
+        elif is_conference_venue and work_type == 'article':
+            return 'conferences'
+        elif work_type == 'preprint':
+            return 'preprints'
+        elif work_type == 'book-chapter':
+            return 'books'
+        elif work_type == 'article':
+            return 'articles'
+        else:
+            return 'others'
 
     def _should_prefer_over(self, paper: Dict, existing: Dict) -> bool:
         paper_venue = (paper.get("venue") or "").lower()
