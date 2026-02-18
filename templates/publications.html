@@ -1,53 +1,60 @@
-<!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ group }} Publications</title>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont,
-                         'Segoe UI', Roboto, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
         .publication {
             margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #eee;
-        }
-        .publication:last-child {
-            border-bottom: none;
         }
         .title {
-            font-size: 1.1em;
-            font-weight: 600;
-            color: #2c3e50;
+            font-weight: bolder;
             margin-bottom: 8px;
         }
         .title a {
-            color: #2c3e50;
             text-decoration: none;
         }
         .title a:hover {
-            color: #3498db;
             text-decoration: underline;
         }
         .authors {
-            color: #555;
             margin-bottom: 5px;
         }
         .venue {
-            color: #666;
             font-style: italic;
             margin-bottom: 5px;
         }
         .meta {
-            color: #888;
+            color: #7a8288;
             font-size: 0.9em;
+        }
+        .year-header {
+            font-weight: bolder;
+            border-bottom: 2px solid;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .search-container {
+            top: 0;
+            background: white;
+            padding: 20px 0;
+            z-index: 100;
+        }
+        .search-box {
+            width: 100%;
+            padding: 12px 20px;
+            font-size: 1em;
+            border: 2px solid #7a8288;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+        .search-info {
+            margin-top: 10px;
+            color: #7a8288;
+            font-size: 0.9em;
+        }
+        .publication.hidden {
+            display: none;
+        }
+        .year-section.hidden {
+            display: none;
         }
         .badge {
             display: inline-block;
@@ -58,10 +65,6 @@
             border-radius: 3px;
             text-transform: uppercase;
         }
-        .badge-accepted {
-            background-color: #fff3cd;
-            color: #856404;
-        }
         .badge-published {
             background-color: #d4edda;
             color: #155724;
@@ -70,89 +73,23 @@
             background-color: #e7f3ff;
             color: #004085;
         }
-        .year-section {
-            margin-top: 40px;
-        }
-        .year-header {
-            font-size: 1.5em;
-            font-weight: 700;
-            color: #2c3e50;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-        }
-        .back-to-top {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 50px;
-            height: 50px;
-            background-color: #3498db;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s, visibility 0.3s, background-color 0.3s;
-            z-index: 1000;
-        }
-        .back-to-top:hover {
-            background-color: #2980b9;
-        }
-        .back-to-top.visible {
-            opacity: 1;
-            visibility: visible;
-        }
-        .search-container {
-            margin: 30px 0;
-            position: sticky;
-            top: 0;
-            background: white;
-            padding: 20px 0;
-            z-index: 100;
-            border-bottom: 2px solid #e0e0e0;
-        }
-        .search-box {
-            width: 100%;
-            padding: 12px 20px;
-            font-size: 1em;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            box-sizing: border-box;
-            transition: border-color 0.3s;
-        }
-        .search-box:focus {
-            outline: none;
-            border-color: #3498db;
-        }
-        .search-info {
-            margin-top: 10px;
-            color: #666;
-            font-size: 0.9em;
-        }
-        .publication.hidden {
-            display: none;
-        }
-        .year-section.hidden {
-            display: none;
+        .type-label {
+            font-size: 0.8em;
+            color: #6c757d;
+            text-transform: uppercase;
+            font-weight: 500;
+            margin-bottom: 4px;
         }
     </style>
 </head>
 <body>
-    <h1>{{ group }} Publications</h1>
-    <p>Last updated: {{ last_updated }}</p>
-    <p>Total publications: <span id="totalCount">{{ total_publications }}</span></p>
-
     <div class="search-container">
         <input type="text" id="searchBox" class="search-box" placeholder="Search publications by title, author, venue, or DOI">
         <div class="search-info" id="searchInfo"></div>
     </div>
 
     {% for year in years %}
-    <div class="year-section">
+    <div id="{{ year }}" class="year-section">
         <h2 class="year-header">{{ year }}</h2>
 
         {% for publication in by_year[year] %}
@@ -165,9 +102,6 @@
                 {% endif %}
 
                 {% set primary_location = publication.raw_data.get('primary_location', {}) %}
-                {% if primary_location.get('is_accepted') %}
-                <span class="badge badge-accepted">Accepted</span>
-                {% endif %}
                 {% if primary_location.get('is_published') %}
                 <span class="badge badge-published">Published</span>
                 {% endif %}
@@ -199,31 +133,13 @@
     </div>
     {% endfor %}
 
-    <button class="back-to-top" id="backToTop" title="Back to top">↑</button>
-
     <script>
-        const backToTopButton = document.getElementById('backToTop');
         const searchBox = document.getElementById('searchBox');
         const searchInfo = document.getElementById('searchInfo');
         const totalCount = document.getElementById('totalCount');
         const publications = document.querySelectorAll('.publication');
         const yearSections = document.querySelectorAll('.year-section');
         const totalPublications = publications.length;
-
-        window.addEventListener('scroll', () => {
-            if (window.pageYOffset > 300) {
-                backToTopButton.classList.add('visible');
-            } else {
-                backToTopButton.classList.remove('visible');
-            }
-        });
-
-        backToTopButton.addEventListener('click', () => {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-        });
 
         searchBox.addEventListener('input', (e) => {
             const searchTerm = e.target.value.toLowerCase().trim();
