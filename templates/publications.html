@@ -81,50 +81,50 @@
         <div class="search-info" id="searchInfo"></div>
     </div>
 
-    {% for year in years %}
+    {%- for year in years %}
     <div id="{{ year }}" class="year-section">
         <h2 class="year-header">{{ year }}</h2>
 
-        {% for publication in by_year[year] %}
+        {%- for publication in by_year[year] %}
         <div class="publication" data-type="{{ publication.display_type | lower }}">
             <div class="title">
-                {% if publication.url %}
+                {%- if publication.url %}
                 <a href="{{ publication.url }}" target="_blank">{{ publication.title or 'Untitled' }}</a>
-                {% else %}
+                {%- else %}
                 {{ publication.title or 'Untitled' }}
-                {% endif %}
+                {%- endif %}
 
-                {% set primary_location = publication.raw_data.get('primary_location', {}) %}
-                {% if primary_location.get('is_published') %}
+                {%- set primary_location = publication.raw_data.get('primary_location', {}) %}
+                {%- if primary_location.get('is_published') %}
                 <span class="badge badge-published">Published</span>
-                {% endif %}
-                {% if publication.raw_data.get('type') == 'preprint' %}
+                {%- endif %}
+                {%- if publication.raw_data.get('type') == 'preprint' %}
                 <span class="badge badge-preprint">Preprint</span>
-                {% endif %}
+                {%- endif %}
             </div>
 
-            {% if publication.authors %}
+            {%- if publication.authors %}
             <div class="authors">{{ publication.authors|join(', ') }}</div>
-            {% endif %}
+            {%- endif %}
 
-            {% if publication.venue %}
+            {%- if publication.venue %}
             <div class="venue">{{ publication.venue }}</div>
-            {% endif %}
+            {%- endif %}
 
-            {% set meta_parts = [] %}
-            {% if publication.doi %}
-                {% set _ = meta_parts.append('DOI: ' ~ publication.doi) %}
-            {% endif %}
-            {% if publication.citation_count %}
-                {% set _ = meta_parts.append('Citations: ' ~ publication.citation_count|string) %}
-            {% endif %}
-            {% if meta_parts %}
+            {%- set meta_parts = [] %}
+            {%- if publication.doi %}
+                {%- set _ = meta_parts.append('DOI: ' ~ publication.doi) %}
+            {%- endif %}
+            {%- if publication.citation_count %}
+                {%- set _ = meta_parts.append('Citations: ' ~ publication.citation_count|string) %}
+            {%- endif %}
+            {%- if meta_parts %}
             <div class="meta">{{ meta_parts|join(' | ') }}</div>
-            {% endif %}
+            {%- endif %}
         </div>
-        {% endfor %}
+        {%- endfor %}
     </div>
-    {% endfor %}
+    {%- endfor %}
 
     <script>
         const searchBox = document.getElementById('searchBox');

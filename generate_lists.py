@@ -16,10 +16,12 @@ class ListGenerator:
                  polite_pool_email: Optional[str] = None,
                  groups: Optional[List[str]] = None,
                  from_year: Optional[int] = None,
-                 exclusion_file: str = "excluded_dois.yaml"):
+                 exclusion_file: str = "excluded_dois.yaml",
+                 manual_file: str = "manual_publications.yaml"):
         self.people_file = people_file
         self.output_dir = output_dir
         self.exclusion_file = exclusion_file
+        self.manual_file = manual_file
         self.people = []
         self.group_config = {}
         self.publications = {}
@@ -27,6 +29,7 @@ class ListGenerator:
         self.selected_groups = groups
         self.from_year = from_year
         self.excluded_dois = set()
+        self.manual_publications = []
 
         if polite_pool_email is None:
             polite_pool_email = os.getenv("OPENALEX_EMAIL")
@@ -43,6 +46,7 @@ class ListGenerator:
             self.group_config = config.get("groups", {})
 
         self._load_excluded_dois()
+        self._load_manual_publications()
 
         if self.selected_groups:
             invalid_groups = [
@@ -111,6 +115,58 @@ class ListGenerator:
             time.sleep(0.5)
 
         print(f"\nTotal unique publications collected: {len(self.publications)}")
+
+    def add_manual_publications(self):
+        if not self.manual_publications:
+            return
+
+        print("\nAdding manual publications...")
+        added_count = 0
+
+        for publication in self.manual_publications:
+            publication_year = publication.get("year")
+            if (self.from_year and publication_year
+                    and publication_year < self.from_year):
+                continue
+
+            publication_groups = publication.get("groups", [])
+            if self.selected_groups:
+                publication_groups = [
+                    group for group in publication_groups
+                    if group in self.selected_groups
+                ]
+                if not publication_groups:
+                    continue
+
+            work_type = publication.get("type", "article")
+            publication_date = publication.get("publication_date")
+            if not publication_date and publication_year:
+                publication_date = f"{publication_year}-01-01"
+            elif not publication_date:
+                publication_date = "0000-00-00"
+
+            paper = self._create_paper(
+                doi=publication.get("doi"),
+                title=publication.get("title", ""),
+                year=publication_year,
+                publication_date=publication_date,
+                authors=publication.get("authors", []),
+                venue=publication.get("venue"),
+                url=publication.get("url") or publication.get("doi"),
+                citation_count=publication.get("citation_count", 0),
+                work_type=work_type,
+                venue_type=publication.get("venue_type"),
+                display_type=publication.get("display_type", "articles"),
+                source="manual",
+                raw_data={"type": work_type},
+                groups=publication_groups
+            )
+
+            self._merge_papers([paper])
+            added_count += 1
+
+        if added_count > 0:
+            print(f"  Added {added_count} manual publications")
 
     def filter_group_collaborators(self):
         print("\nApplying group collaborator filters...")
@@ -250,6 +306,7 @@ class ListGenerator:
 
         self.load_config()
         self.fetch_all_publications(self.from_year)
+        self.add_manual_publications()
         self.filter_group_collaborators()
         self.generate_html_outputs()
 
@@ -392,6 +449,35 @@ class ListGenerator:
 
         return None
 
+    def _create_paper(self, doi: Optional[str], title: str,
+                      year: Optional[int],
+                      publication_date: Optional[str], authors: List[str],
+                      venue: Optional[str], url: Optional[str],
+                      citation_count: int, work_type: str,
+                      venue_type: Optional[str], display_type: str,
+                      source: str, raw_data: Dict,
+                      groups: Optional[List[str]] = None) -> Dict:
+        paper = {
+            "doi": doi,
+            "title": title,
+            "year": year,
+            "publication_date": publication_date,
+            "authors": authors,
+            "venue": venue,
+            "url": url,
+            "citation_count": citation_count,
+            "type": work_type,
+            "venue_type": venue_type,
+            "display_type": display_type,
+            "source": source,
+            "raw_data": raw_data
+        }
+
+        if groups is not None:
+            paper["groups"] = groups
+
+        return paper
+
     def _parse_openalex_work(self, work: Dict) -> Optional[Dict]:
         try:
             doi = (work.get("doi") or "").replace("https://doi.org/", "")
@@ -409,23 +495,26 @@ class ListGenerator:
                     venue_type = source.get("type")
 
             display_type = self._get_display_type(work_type, venue_type, venue)
+            authors = [
+                author.get("author", {}).get("display_name", "")
+                for author in work.get("authorships", [])
+            ]
 
-            paper = {
-                "doi": doi or None,
-                "title": work.get("title", ""),
-                "year": work.get("publication_year"),
-                "publication_date": work.get("publication_date"),
-                "authors": [author.get("author", {}).get("display_name", "")
-                            for author in work.get("authorships", [])],
-                "venue": venue,
-                "url": work.get("doi") or work.get("id", ""),
-                "citation_count": work.get("cited_by_count", 0),
-                "type": work_type,
-                "venue_type": venue_type,
-                "display_type": display_type,
-                "source": "openalex",
-                "raw_data": work
-            }
+            paper = self._create_paper(
+                doi=doi or None,
+                title=work.get("title", ""),
+                year=work.get("publication_year"),
+                publication_date=work.get("publication_date"),
+                authors=authors,
+                venue=venue,
+                url=work.get("doi") or work.get("id", ""),
+                citation_count=work.get("cited_by_count", 0),
+                work_type=work_type,
+                venue_type=venue_type,
+                display_type=display_type,
+                source="openalex",
+                raw_data=work
+            )
 
             return paper if paper["title"] else None
 
@@ -522,10 +611,24 @@ class ListGenerator:
                     self.excluded_dois = set(
                         doi.lower() for doi in data["excluded_dois"]
                     )
-                    print(f"  Loaded {len(self.excluded_dois)} excluded DOIs"
+                    print(f"  Loaded {len(self.excluded_dois)} excluded DOIs "
                           f"from {self.exclusion_file}")
         except Exception as e:
             print(f"  Warning: Could not load {self.exclusion_file}: {e}")
+
+    def _load_manual_publications(self):
+        if not os.path.exists(self.manual_file):
+            return
+
+        try:
+            with open(self.manual_file, "r") as file:
+                data = yaml.safe_load(file)
+                if data and "manual_publications" in data:
+                    self.manual_publications = data["manual_publications"]
+                    print(f"  Loaded {len(self.manual_publications)} manual "
+                          f"publications from {self.manual_file}")
+        except Exception as e:
+            print(f"  Warning: Could not load {self.manual_file}: {e}")
 
     def _merge_papers(self, papers: List[Dict]):
         for paper in papers:

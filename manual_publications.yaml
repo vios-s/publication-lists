@@ -1,0 +1,27 @@
+manual_publications:
+  # Example entry with all optional fields:
+  # - title: "Example Paper Title"
+  #   authors:
+  #     - "First Author"
+  #     - "Second Author"
+  #     - "Third Author"
+  #   year: 2024
+  #   venue: "Conference on Example Research"
+  #   doi: "10.1234/example.2024.12345"
+  #   url: "https://example.com/paper.pdf"  # Optional: use if no DOI
+  #   publication_date: "2024-06-15"  # Optional: defaults to January 1st of year
+  #   groups:
+  #     - VIOS
+  #     - CHAI
+  #   type: "article"  # Optional: article, preprint, book-chapter, etc.
+  #   venue_type: "conference"  # Optional: conference, journal
+  #   display_type: "conferences"  # Optional: conferences, journals, preprints, books, articles, others
+  #   citation_count: 42  # Optional: defaults to 0
+
+  # Minimal example (only required fields):
+  # - title: "Another Example Paper"
+  #   authors:
+  #     - "Jane Doe"
+  #   year: 2023
+  #   groups:
+  #     - VIOS
