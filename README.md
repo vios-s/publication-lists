@@ -78,6 +78,8 @@ manual_publications:
 
 Required fields: `title`, `authors`, `year`, `groups`. All other fields are optional.
 
+**Note:** Manual publications bypass the collaborator filter. They are always included in the output for their specified groups, regardless of `required_collaborators` settings.
+
 ### excluded_dois.yaml
 
 Exclude incorrectly attributed publications:

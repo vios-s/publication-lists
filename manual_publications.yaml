@@ -1,27 +1,856 @@
 manual_publications:
-  # Example entry with all optional fields:
-  # - title: "Example Paper Title"
-  #   authors:
-  #     - "First Author"
-  #     - "Second Author"
-  #     - "Third Author"
-  #   year: 2024
-  #   venue: "Conference on Example Research"
-  #   doi: "10.1234/example.2024.12345"
-  #   url: "https://example.com/paper.pdf"  # Optional: use if no DOI
-  #   publication_date: "2024-06-15"  # Optional: defaults to January 1st of year
-  #   groups:
-  #     - VIOS
-  #     - CHAI
-  #   type: "article"  # Optional: article, preprint, book-chapter, etc.
-  #   venue_type: "conference"  # Optional: conference, journal
-  #   display_type: "conferences"  # Optional: conferences, journals, preprints, books, articles, others
-  #   citation_count: 42  # Optional: defaults to 0
-
-  # Minimal example (only required fields):
-  # - title: "Another Example Paper"
-  #   authors:
-  #     - "Jane Doe"
-  #   year: 2023
-  #   groups:
-  #     - VIOS
+- title: Complementary Time-Frequency Domain Networks for Dynamic Parallel MR Image Reconstruction
+  authors:
+  - C. Qin
+  - J. Duan
+  - K. Hammernik
+  - J. Schlemper
+  - T. Küstner
+  - R. Botnar
+  - C. Prieto
+  - A. N. Price
+  - J. V. Hajnal
+  - D. Rueckert
+  year: 2021
+  venue: Magnetic Resonance in Medicine
+  groups:
+  - VIOS
+  url: https://onlinelibrary.wiley.com/doi/10.1002/mrm.28917
+  display_type: journals
+  venue_type: journal
+- title: 'Deep Learning for Cardiac Image Segmentation: A Review'
+  authors:
+  - C. Chen
+  - C. Qin
+  - H. Qiu
+  - G. Tarroni
+  - J. Duan
+  - W. Bai
+  - D. Rueckert
+  year: 2020
+  venue: Frontiers in Cardiovascular Medicine, vol. 7
+  groups:
+  - VIOS
+  url: https://www.frontiersin.org/journals/cardiovascular-medicine/articles/10.3389/fcvm.2020.00025/full
+  display_type: journals
+  venue_type: journal
+- title: Brain lesion segmentation through image synthesis and outlier detection
+  authors:
+  - C. Bowles
+  - C. Qin
+  - R. Guerrero
+  - R. Gunn
+  - A. Hammers
+  - D.A. Dickie
+  - M. Valdés Hernández
+  - J. Wardlaw
+  - D. Rueckert
+  year: 2017
+  venue: 'NeuroImage: Clinical, vol. 16'
+  groups:
+  - VIOS
+  url: https://www.sciencedirect.com/science/article/pii/S2213158217302164?via%3Dihub
+  display_type: journals
+  venue_type: journal
+- title: Editorial for Simulation and Synthesis in Medical Imaging
+  authors:
+  - A. Frangi
+  - S.A. Tsaftaris
+  - J. Prince
+  year: 2018
+  venue: IEEE Transactions on Medical Imaging, vol. 37, no. 3, pp. 673-679
+  groups:
+  - VIOS
+  url: https://ieeexplore.ieee.org/document/8305584
+  display_type: journals
+  venue_type: journal
+- title: White matter hyperintensity and stroke lesion segmentation and differentiation using convolutional neural networks
+  authors:
+  - R. Guerrero
+  - C. Qin
+  - O. Oktay
+  - C. Bowles
+  - L. Chen
+  - R. Joules
+  - R. Wolz
+  - M.C. Valdés-Hernández
+  - D.A. Dickie
+  - J. Wardlaw
+  - D. Rueckert
+  year: 2018
+  venue: 'NeuroImage: Clinical, vol. 17'
+  groups:
+  - VIOS
+  url: https://www.sciencedirect.com/science/article/pii/S2213158217303273?via%3Dihub
+  display_type: journals
+  venue_type: journal
+- title: A large margin algorithm for automated segmentation of white matter hyperintensity
+  authors:
+  - C. Qin
+  - R. Guerrero
+  - C. Bowles
+  - L. Chen
+  - D.A. Dickie
+  - M. del C. Valdes-Hernandez
+  - J. Wardlaw
+  - D. Rueckert
+  year: 2018
+  venue: Pattern Recognition, vol. 77
+  groups:
+  - VIOS
+  url: https://link.springer.com/chapter/10.1007/978-3-031-45857-6_5
+  display_type: journals
+  venue_type: journal
+- title: Arterial CO2 Can Potentiate Myocardial Blood Flow to the Same Extent as Adenosine
+  authors:
+  - H.J. Yang
+  - D. Dey
+  - J. Sykes
+  - M. Klein
+  - J. Butler
+  - M. Kovacs
+  - O. Sobczyk
+  - B. Sharif
+  - X. Bi
+  - A. Kali
+  - I. Cokic
+  - R. Tang
+  - R. Yumul
+  - A. Conte
+  - S.A. Tsaftaris
+  - M. Tighiouart
+  - D. Li
+  - P.J. Slomka
+  - D. Berman
+  - F. Prato
+  - J. Fisher
+  - R. Dharmakumar
+  year: 2017
+  venue: Journal of Nuclear Medicine, vol. 58. no. 6, pp. 953-960
+  groups:
+  - VIOS
+  url: https://jnm.snmjournals.org/content/58/6/953
+  display_type: journals
+  venue_type: journal
+- title: Convolutional Recurrent Neural Networks for Dynamic MR Image Reconstruction
+  authors:
+  - C. Qin
+  - J. Schlemper
+  - J. Caballero
+  - A.N. Price
+  - J.V. Hajnal
+  - D. Rueckert
+  year: 2019
+  venue: IEEE Transactions on Medical Imaging, vol. 38
+  groups:
+  - VIOS
+  url: https://ieeexplore.ieee.org/abstract/document/8425639
+  display_type: journals
+  venue_type: journal
+- title: Editorial for Special Issue on Reproducible Research
+  authors:
+  - Ö.N. Gerek
+  - B. Boashash
+  - M. Leszczuk
+  - S.A. Tsaftaris
+  - W. Armour
+  - D. Wallom
+  year: 2018
+  venue: Digital Signal Processing, vol. 77, pp. 1-4
+  groups:
+  - VIOS
+  url: https://www.sciencedirect.com/science/article/abs/pii/S105120041830112X
+  display_type: journals
+  venue_type: journal
+- title: 'Image Analysis: the new bottleneck in plant phenotyping'
+  authors:
+  - M. Minervini
+  - H. Scharr
+  - S.A. Tsaftaris
+  year: 2015
+  venue: IEEE Signal Processing Magazine, vol. 32, no. 4, pp. 126-131
+  groups:
+  - VIOS
+  url: https://ieeexplore.ieee.org/document/7123050?arnumber=7123050
+  display_type: journals
+  venue_type: journal
+- title: Neuroimaging Evidence of Major Morpho-Anatomical and Functional Abnormalities in the BTBR T+TF/J Mouse Model of Autism
+  authors:
+  - L. Dodero
+  - M. Damiano
+  - S.A. Tsaftaris
+  - A. Galbusera
+  - A. Bifone
+  - M. L. Scattoni
+  - A. Gozzi
+  year: 2013
+  venue: PLoS One, vol. 8, no. 10, pp. 76655
+  groups:
+  - VIOS
+  url: https://plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0076655
+  display_type: journals
+  venue_type: journal
+- title: Chronic Manifestation of Post-Reperfusion Intramyocardial Hemorrhage as Regional Iron Deposition - A Cardiovascular MR Study with Ex-vivo Validation
+  authors:
+  - A. Kali
+  - A. Kumar
+  - I. Cokic
+  - R. Yang
+  - S.A. Tsaftaris
+  - R. Tang
+  - D. Li
+  - M.G. Friedrich
+  - R. Dharmakumar
+  year: 2013
+  venue: Circulation Cardiovascular Imaging, vol. 6, no. 2, pp. 218-228
+  groups:
+  - VIOS
+  url: https://www.ahajournals.org/doi/10.1161/circimaging.112.000133
+  display_type: journals
+  venue_type: journal
+- title: Detecting Myocardial Ischemia at Rest with Cardiac Phase-Resolved BOLD CMR
+  authors:
+  - S.A. Tsaftaris
+  - X. Zhou
+  - R. Tang
+  - D. Li
+  - R. Dharmakumar
+  year: 2013
+  venue: Circulation Cardiovascular Imaging, vol. 6, no. 2, pp. 311-319
+  groups:
+  - VIOS
+  url: https://www.ahajournals.org/doi/full/10.1161/circimaging.112.976076
+  display_type: journals
+  venue_type: journal
+- title: Myocardial Blood-Oxygen-Level-Dependent Magnetic Resonance Imaging with Balanced Steady-State Free Precession Imaging Approaches
+  authors:
+  - R. Dharmakumar
+  - S.A. Tsaftaris
+  - D. Li
+  year: 2012
+  venue: The Open Medical Imaging Journal, vol. 6, pp. 31-38
+  groups:
+  - VIOS
+  url: https://benthamopen.com/ABSTRACT/TOMIJ-6-31
+  display_type: journals
+  venue_type: journal
+- title: Low-Complexity Video Compression for Automated Transportation Surveillance
+  authors:
+  - E. Soyak
+  - S.A. Tsaftaris
+  - A. K. Katsaggelos
+  year: 2011
+  venue: IEEE Transactions on Circuits and Systems for Video Technology, vol. 21, no. 10, pp. 1378-1389
+  groups:
+  - VIOS
+  url: https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=5971775&tag=1
+  display_type: journals
+  venue_type: journal
+- title: 'T2-weighted STIR Imaging of Myocardial Edema Associated with Ischemia-Reperfusion Injury: The Influence of Proton Density Effect on Image Contrast'
+  authors:
+  - X. Zhou
+  - V. Rundell
+  - Y. Liu
+  - R. Tang
+  - R. Klein
+  - S. Shah
+  - S. Zuehlsdorff
+  - S.A. Tsaftaris
+  - D. Li
+  - R. Dharmakumar
+  year: 2011
+  venue: Journal of Magnetic Resonance Imaging, vol. 33, no. 4, pp. 962-967
+  groups:
+  - VIOS
+  url: https://onlinelibrary.wiley.com/doi/full/10.1002/jmri.22456
+  display_type: journals
+  venue_type: journal
+- title: Dual Contrast Cellular MRI
+  authors:
+  - R. Dharmakumar
+  - Z. Zhang
+  - I. Koktzoglou
+  - S.A. Tsaftaris
+  - D. Li
+  year: 2009
+  venue: Molecular Imaging, vol. 8, no. 5, pp. 254-63
+  groups:
+  - VIOS
+  url: https://journals.sagepub.com/doi/pdf/10.2310/7290.2009.00024
+  display_type: journals
+  venue_type: journal
+- title: 'Simulation and Synthesis in Medical Imaging: Second International Workshop, SASHIMI 2017'
+  authors:
+  - S.A. Tsaftaris
+  - A. Gooya
+  - A Frangi
+  - J. Prince
+  year: 2017
+  venue: SASHIMI, Held in Conjunction with MICCAI, Quebec City, Lecture Notes in Computer Science, vol. 10557
+  groups:
+  - VIOS
+  url: https://www.springer.com/la/book/9783319681269
+  display_type: books
+- title: 'Simulation and Synthesis in Medical Imaging: First International Workshop, SASHIMI 2016'
+  authors:
+  - S.A. Tsaftaris
+  - A. Gooya
+  - A Frangi
+  - J. Prince
+  year: 2016
+  venue: SASHIMI, Held in Conjunction with MICCAI, Athens, Greece, Lecture Notes in Computer Science, vol. 9968
+  groups:
+  - VIOS
+  url: https://www.springer.com/la/book/9783319466293
+  display_type: books
+- title: 'La Joie De Vivre: The Evolution of a Masterpiece'
+  authors:
+  - S.A. Tsaftaris
+  - F. Casadio
+  - G. Gautier
+  - J.-L. Andral
+  - A.K. Katsaggelos
+  year: 2011
+  venue: Picasso Express, J.L. Andral, -01-01
+  groups:
+  - VIOS
+  display_type: others
+- title: 'Contribution to Matisse: Radical Invention, 1913 - 1917'
+  authors:
+  - S.A. Tsaftaris
+  - A.K. Katsaggelos
+  year: 2010
+  venue: 'Matisse: Radical Invention, S. D''Alessandro, J. Elderfield, Art Institute of Chicago-01-01'
+  groups:
+  - VIOS
+  url: https://yalebooks.yale.edu/book/9780300177244/matisse
+  display_type: others
+- title: 'CRCE: Coreference-Retention Concept Erasure in Text-to-Image Diffusion Models'
+  authors:
+  - Yuyang Xue
+  - Edward Moroshko
+  - Feng Chen
+  - Steven McDonagh
+  - Sotirios A Tsaftaris
+  year: 2025
+  venue: BMVC
+  groups:
+  - VIOS
+  url: https://arxiv.org/abs/2503.14232
+  display_type: conferences
+  venue_type: conference
+- title: 'There are no shortcuts to anywhere worth going: identifying shortcuts in deep learning models for medical image analysis'
+  authors:
+  - Christopher Boland
+  - Keith A Goatman
+  - Sotirios A Tsaftaris
+  - Sonia Dahdouh
+  year: 2025
+  venue: MIDL
+  groups:
+  - VIOS
+  url: https://openreview.net/pdf?id=3UMzxqDcpY
+  display_type: conferences
+  venue_type: conference
+- title: Biomechanics-Informed Neural Networks for Myocardial Motion Tracking in MRI
+  authors:
+  - C. Qin
+  - S. Wang
+  - C. Chen
+  - H. Qiu
+  - W. Bai
+  - D. Rueckert.
+  year: 2020
+  venue: MICCAI
+  groups:
+  - VIOS
+  url: https://arxiv.org/abs/2006.04725
+  display_type: conferences
+  venue_type: conference
+- title: 'Tail of Distribution GAN: GAN-Based Boundary of Distribution Formation'
+  authors:
+  - N. Dionelis
+  - M. Yaghoobi
+  - S.A. Tsaftaris
+  year: 2020
+  venue: SSPD
+  groups:
+  - VIOS
+  display_type: conferences
+  venue_type: conference
+- title: Temporal Consistency Objectives Regularize the Learning of Disentangled Representations
+  authors:
+  - G. Valvano
+  - A. Chartsias
+  - A. Leo
+  - S.A. Tsaftaris
+  year: 2019
+  venue: 'MICCAI, DART: Domain Adaptation and Representation Transfer'
+  groups:
+  - VIOS
+  url: https://arxiv.org/abs/1908.11330
+  display_type: conferences
+  venue_type: conference
+- title: 'Doing more with less: semi-supervised cardiac segmentation with a fraction of labeled images'
+  authors:
+  - A. Chartsias
+  - T. Joyce
+  - G. Papanastasiou
+  - S. Semple
+  - M. Williams
+  - D. Newby
+  - R. Dharmakumar
+  - S.A. Tsaftaris
+  year: 2019
+  venue: SCMR
+  groups:
+  - VIOS
+  display_type: conferences
+  venue_type: conference
+- title: Joint learning of motion estimation and segmentation for cardiac MR image sequences.
+  authors:
+  - C. Qin
+  - W. Bai
+  - J. Schlemper
+  - S. E. Petersen
+  - S. K. Piechnik
+  - S. Neubauer
+  - D. Rueckert
+  year: 2018
+  venue: MICCAI
+  groups:
+  - VIOS
+  url: https://arxiv.org/abs/1806.04066
+  display_type: conferences
+  venue_type: conference
+- title: 'Factorised spatial representation learning: application in semi-supervised myocardial segmentation'
+  authors:
+  - A. Chartsias
+  - T. Joyce
+  - G. Papanastasiou
+  - S. Semple
+  - M. Williams
+  - D. Newby
+  - R. Dharmakumar
+  - S.A. Tsaftaris
+  year: 2018
+  venue: MICCAI
+  groups:
+  - VIOS
+  url: https://arxiv.org/abs/1803.07031
+  display_type: conferences
+  venue_type: conference
+- title: A Semi-supervised Large Margin Algorithm for White Matter Hyperintensity Segmentation
+  authors:
+  - C. Qin
+  - R. Moreno
+  - C. Bowles
+  - C. Ledig
+  - P. Scheltens
+  - F. Barkhof
+  - H. Rhodius-Meester
+  - B. Tijms
+  - A.W. Lemstra
+  - W.M. van der Flier
+  - B. Glocker
+  - D. Rueckert
+  year: 2016
+  venue: 'MICCAI, MLMI: Machine Learning in Medical Imaging'
+  groups:
+  - VIOS
+  url: https://link.springer.com/chapter/10.1007/978-3-319-47157-0_13
+  display_type: conferences
+  venue_type: conference
+- title: Pseudo-healthy Image Synthesis for White Matter Lesion Segmentation
+  authors:
+  - C. Bowles
+  - C. Qin
+  - C. Ledig
+  - R. Guerrero
+  - R. Gunn
+  - A. Hammers
+  - E. Sakka
+  - D.A. Dickie
+  - M. Valdés Hernández
+  - N. Royle
+  - J. Wardlaw
+  - H. Rhodius-Meester
+  - B. Tijms
+  - A.W. Lemstra
+  - W. van der Flier
+  - F. Barkhof
+  - P. Scheltens
+  - D. Rueckert
+  year: 2016
+  venue: 'MICCAI, SASHIMI: Simulation and Synthesis in Medical Imaging'
+  groups:
+  - VIOS
+  url: https://link.springer.com/chapter/10.1007/978-3-319-46630-9_9
+  display_type: conferences
+  venue_type: conference
+- title: Rotation-Invariant Restricted Boltzmann Machine using Shared Gradient Filters
+  authors:
+  - M.V. Giuffrida
+  - S.A. Tsaftaris
+  year: 2016
+  venue: ICANN
+  groups:
+  - VIOS
+  url: https://arxiv.org/abs/1604.07045
+  display_type: conferences
+  venue_type: conference
+- title: Dictionary-based Support Vector Machines for Unsupervised Ischemia Detection at Rest with CP-BOLD Cardiac MRI
+  authors:
+  - M. Bevilacqua
+  - A. Mukhopadhyay
+  - I. Oksuz
+  - C. Rusu
+  - R. Dharmakumar
+  - S.A. Tsaftaris
+  year: 2015
+  venue: ISMRM
+  groups:
+  - VIOS
+  display_type: conferences
+  venue_type: conference
+- title: Data Driven Feature Learning For Representation of Myocardial BOLD MR Images
+  authors:
+  - A. Mukhopadhyay
+  - M. Bevilacqua
+  - I. Oksuz
+  - R. Dharmakumar
+  - S.A. Tsaftaris
+  year: 2015
+  venue: ISMRM
+  groups:
+  - VIOS
+  display_type: conferences
+  venue_type: conference
+- title: Effect of BOLD Contrast on Myocardial Registration
+  authors:
+  - I. Oksuz
+  - A. Mukhopadhyay
+  - M. Bevilacqua
+  - H.-J. Yang
+  - R. Dharmakumar
+  - S.A. Tsaftaris
+  year: 2015
+  venue: ISMRM
+  groups:
+  - VIOS
+  display_type: conferences
+  venue_type: conference
+- title: 'Electrical Characteristics of Chronic Iron-Laden Myocardial Infarcts: Initial Study in Canine Hearts'
+  authors:
+  - I. Cokic
+  - A. Kali
+  - X. Wang
+  - H. Yang
+  - R.L. Tang
+  - A. Thajudeen
+  - M. Shehata
+  - A.M. Amorn
+  - E. Liu
+  - B. Stewart
+  - N. Bennett
+  - D. Harlev
+  - S.A. Tsaftaris
+  - W.M. Jackman
+  - S.S. Chugh
+  - R. Dharmakumar
+  year: 2014
+  venue: ISMRM
+  groups:
+  - VIOS
+  display_type: conferences
+  venue_type: conference
+- title: 'Unsupervised Ischemia Detection at Rest with CP-BOLD Cardiac MRI: A Simulation Study Employing Independent Component Analysis'
+  authors:
+  - R. Morisi
+  - R. Dharmakumar
+  - S.A. Tsaftaris
+  year: 2014
+  venue: ISMRM
+  groups:
+  - VIOS
+  url: https://archive.ismrm.org/2014/0248.html
+  display_type: conferences
+  venue_type: conference
+- title: 'Temporal and Spatial Variation of Baseline Myocardial BOLD Signal Intensity in Cardiac Phase-Resolved BOLD MRI: A Potentially Revealing Insight into Dynamic Changes in Myocardial Oxygenation'
+  authors:
+  - D. Boschetto
+  - C. Rusu
+  - R. Dharmakumar
+  - S.A. Tsaftaris
+  year: 2014
+  venue: ISMRM
+  groups:
+  - VIOS
+  display_type: conferences
+  venue_type: conference
+- title: Impact of Chronic Iron Deposition Following Myocardial Infarction on Gross Electrical Characteristics
+  authors:
+  - I. Cokic
+  - Kali A
+  - Yang H
+  - Tang RL
+  - S.A. Tsaftaris
+  - R. Dharmakumar
+  year: 2014
+  venue: HRS
+  groups:
+  - VIOS
+  display_type: conferences
+  venue_type: conference
+- title: Assessment of Controlled Iso-Oxic Hypercapnic Stimulation of Myocardial Blood Flow using Oxygen Dependent Cardiac Magnetic Resonance Imaging
+  authors:
+  - H. Yang
+  - R. Yumul
+  - R.L. Tang
+  - I. Cokic
+  - M. Klein
+  - A. Kali
+  - O. Sobczyk
+  - B. Sharif
+  - J. Tang
+  - X. Bi
+  - S.A. Tsaftaris
+  - D. Li
+  - J. Min
+  - D.S. Berman
+  - A.H. Conte
+  - J. Fisher
+  - R. Dharmakumar
+  year: 2014
+  venue: ACC
+  groups:
+  - VIOS
+  url: https://core.ac.uk/download/pdf/82754605.pdf
+  display_type: conferences
+  venue_type: conference
+- title: Neuroimaging Evidence of Major Morpho-Anatomical and Functional Abnormalities in the BTBR T+TF/J Mouse Model of Autism
+  authors:
+  - L. Dodero
+  - F. Sforazzini
+  - A. Galbusera
+  - M. Damiano
+  - S.A. Tsaftaris
+  - A. Bifone
+  - M. L. Scattoni
+  - A. Gozzi
+  year: 2013
+  venue: IMFAR
+  groups:
+  - VIOS
+  url: https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0076655
+  display_type: conferences
+  venue_type: conference
+- title: 'Acute Hemorrhagic Myocardial Infarction Leads to Localized Chronic Iron Deposition: A CMR Study'
+  authors:
+  - A. Kali
+  - I. Cokic
+  - A. Kumar
+  - S.A. Tsaftaris
+  - R. Tang
+  - M. Friedrich
+  - R. Dharmakumar
+  year: 2013
+  venue: ISMRM
+  groups:
+  - VIOS
+  url: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3559768/
+  display_type: conferences
+  venue_type: conference
+- title: Detecting ACS and Identifying Acute Ischemic Territories with Cardiac Phase-Resolved BOLD MRI at Rest
+  authors:
+  - S.A. Tsaftaris
+  - X. Zhou
+  - R. Tang
+  - J. Min
+  - D. Li
+  - R. Dharmakumar
+  year: 2012
+  venue: ISMRM
+  groups:
+  - VIOS
+  url: https://cds.ismrm.org/protected/12MProceedings/files/0153.pdf
+  display_type: conferences
+  venue_type: conference
+- title: 'PHIDIAS: Plant Phenotyping with a High-throughput, Intelligent, Distributed, and Integrated Analysis System'
+  authors:
+  - S.A. Tsaftaris
+  year: 2011
+  venue: IPPS
+  groups:
+  - VIOS
+  display_type: conferences
+  venue_type: conference
+- title: An Area-based Imaging Biomarker for the Characterization of Coronary Artery Stenosis with Blood Oxygen-Sensitive MRI
+  authors:
+  - S.A. Tsaftaris
+  - R. Tang
+  - X. Zhou
+  - D. Li
+  - R. Dharmakumar
+  year: 2011
+  venue: ISMRM
+  groups:
+  - VIOS
+  url: https://pdfs.semanticscholar.org/7d78/e54123c7fc83f326e1df8de95d2adbc3ee14.pdf
+  display_type: conferences
+  venue_type: conference
+- title: 'Detecting Myocardial Ischemia at Rest with Cardiac Phase-Resolved BOLD MRI: Early Findings'
+  authors:
+  - S.A. Tsaftaris
+  - V. Rundell
+  - X. Zhou
+  - Y. Liu
+  - R. Tang
+  - D. Li
+  - R. Dharmakumar
+  year: 2011
+  venue: ISMRM
+  groups:
+  - VIOS
+  url: https://www.ahajournals.org/doi/reader/10.1161/CIRCIMAGING.112.976076
+  display_type: conferences
+  venue_type: conference
+- title: On the origin of myocardial edema contrast in T2-STIR images
+  authors:
+  - X. Zhou
+  - V. Rundell
+  - Y. Liu
+  - R. Tang
+  - R. Klein
+  - S. Giri
+  - S. Shah
+  - S.A. Tsaftaris
+  - S. Zuehlsdorff
+  - O. Simonetti
+  - D. Li
+  - R. Dharmakumar
+  year: 2010
+  venue: ISMRM
+  groups:
+  - VIOS
+  display_type: conferences
+  venue_type: conference
+- title: Myocardial BOLD imaging using flow compensated 2D cine bSSFP
+  authors:
+  - X. Zhou
+  - S.A. Tsaftaris
+  - Y. Liu
+  - R. Tang
+  - R. Klein
+  - S. Zuehlsdorff
+  - D. Li
+  - R. Dharmakumar
+  year: 2010
+  venue: ISMRM
+  groups:
+  - VIOS
+  display_type: conferences
+  venue_type: conference
+- title: Unsupervised and Reproducible Image-based Identifi-cation of Cardiac Phases in Cine SSFP MRI
+  authors:
+  - S.A. Tsaftaris
+  - X. Zhou
+  - R. Tang
+  - R. Dharmakumar
+  year: 2010
+  venue: ISMRM
+  groups:
+  - VIOS
+  display_type: conferences
+  venue_type: conference
+- title: Unsupervised reconstruction for ungated ghost angiography by clustering of image features
+  authors:
+  - S.A. Tsaftaris
+  - E. Offerman
+  - R. Edelman
+  - I. Koktzoglou
+  year: 2010
+  venue: ISMRM
+  groups:
+  - VIOS
+  display_type: conferences
+  venue_type: conference
+- title: Automated Assessment of Ghost Artifacts in MRI
+  authors:
+  - S.A. Tsaftaris
+  - X. Zhou
+  - R. Dharmakumar
+  year: 2010
+  venue: ISMRM
+  groups:
+  - VIOS
+  display_type: conferences
+  venue_type: conference
+- title: A New Quantitative Imaging Biomarker for Identifying Critical Coronary Artery Stenosis with Myocardial BOLD MRI
+  authors:
+  - S.A. Tsaftaris
+  - X. Zhou
+  - D. Li
+  - R. Dharmakumar
+  year: 2010
+  venue: ISMRM
+  groups:
+  - VIOS
+  display_type: conferences
+  venue_type: conference
+- title: Dual Contrast Cellular MRI
+  authors:
+  - R. Dharmakumar
+  - Z. Zhang
+  - I. Koktzoglou
+  - S.A. Tsaftaris
+  - D. Li
+  year: 2010
+  venue: ISMRM
+  groups:
+  - VIOS
+  display_type: conferences
+  venue_type: conference
+- title: 'Visualization and Tracking of a Conventional Guidewire with Low Flip Angle SSFP Imaging: An Initial Study'
+  authors:
+  - R. Dharmakumar
+  - I. Koktzoglou
+  - S.A. Tsaftaris
+  - S. Zuehlsdorff
+  - R. Tang
+  - G. Wright
+  - D. Li
+  year: 2009
+  venue: ISMRM
+  groups:
+  - VIOS
+  url: https://cds.ismrm.org/protected/09MProceedings/files/02571.pdf
+  display_type: conferences
+  venue_type: conference
+- title: Visualizing and Quantifying Myocardial Oxyge-nation Changes with Statistically Optimal Colormaps
+  authors:
+  - S.A. Tsaftaris
+  - R. Tang
+  - R. Klein
+  - D. Li
+  - R. Dharmakumar
+  year: 2009
+  venue: ISMRM
+  groups:
+  - VIOS
+  url: https://cds.ismrm.org/protected/09MProceedings/files/03759.pdf
+  display_type: conferences
+  venue_type: conference
+- title: An Intensity Based Statistical Approach for Left Ventricular Localization and Identification of End-Systolic and End-Diastolic Images from Cine Cardiac MRI
+  authors:
+  - S.A. Tsaftaris
+  - X. Zhou
+  - R. Tang
+  - R. Klein
+  - R. Dharmakumar
+  year: 2009
+  venue: ISMRM
+  groups:
+  - VIOS
+  display_type: conferences
+  venue_type: conference

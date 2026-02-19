@@ -170,6 +170,7 @@ class ListGenerator:
 
     def filter_group_collaborators(self):
         print("\nApplying group collaborator filters...")
+        print("  (Manual publications are exempt from this filter)")
 
         group_removals = {}
         removed_completely = []
@@ -194,6 +195,9 @@ class ListGenerator:
                 groups = paper.get("groups", [])
 
                 if group_name in groups:
+                    if paper.get("source") == "manual":
+                        continue
+
                     authors = paper.get("authors", [])
 
                     required_collabs = set()
