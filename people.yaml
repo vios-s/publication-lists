@@ -3,7 +3,7 @@ groups:
     required_collaborators:
       - "Sotirios A. Tsaftaris"
       - "Steven McDonagh"
-      - "Valerio Giuffrida"
+      - "Mario Valerio Giuffrida"
   CHAI:
     required_collaborators:
       - "Sotirios A. Tsaftaris"
@@ -28,7 +28,7 @@ members:
     institution: "University of Edinburgh"
     orcid: "0000-0001-7025-5197"
 
-  - name: "Valerio Giuffrida"
+  - name: "Mario Valerio Giuffrida"
     groups:
       - VIOS
     institution: "University of Nottingham"
