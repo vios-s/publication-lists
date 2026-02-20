@@ -84,15 +84,14 @@ class ListGenerator:
         for person in self.people:
             name = person.get("name")
             orcid = person.get("orcid")
-            openalex_id = person.get("openalex_id")
             institution = person.get("institution")
             groups = person.get("groups", [])
 
             print(f"\n  Processing: {name} ({', '.join(groups)})")
 
             # Try to find ORCID if not provided
-            if not orcid and not openalex_id:
-                print("    No ORCID or OpenAlex ID provided, attempting lookup...")
+            if not orcid:
+                print("    No ORCID provided, attempting lookup...")
                 orcid = self._find_orcid_for_person(name, institution)
 
                 if orcid:
@@ -101,7 +100,7 @@ class ListGenerator:
                 else:
                     print("    ⚠️  Falling back to name search (less reliable)")
 
-            papers = self._fetch_from_openalex(name, orcid, openalex_id, from_year)
+            papers = self._fetch_from_openalex(name, orcid, from_year)
 
             for paper in papers:
                 if "groups" not in paper:
@@ -322,7 +321,6 @@ class ListGenerator:
 
     def _fetch_from_openalex(self, author_name: str,
                              orcid: Optional[str] = None,
-                             openalex_id: Optional[str] = None,
                              from_year: Optional[int] = None) -> List[Dict]:
         papers = []
 
@@ -334,12 +332,6 @@ class ListGenerator:
                     f"authorships.author.orcid:{orcid}"
                 )
                 strategy = f"ORCID: {orcid}"
-            elif openalex_id:
-                url = (
-                    f"https://api.openalex.org/works?filter="
-                    f"authorships.author.id:{openalex_id}"
-                )
-                strategy = f"OpenAlex ID: {openalex_id}"
             else:
                 # Fall back to name search (less reliable)
                 url = (

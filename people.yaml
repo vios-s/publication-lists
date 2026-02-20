@@ -77,6 +77,7 @@ members:
       - VIOS
       - CHAI
     institution: "University of Edinburgh"
+    orcid: "0009-0002-2631-4043"
 
   - name: "Zhihua Liu"
     groups:
@@ -101,6 +102,7 @@ members:
     groups:
       - VIOS
     institution: "University of Edinburgh"
+    orcid: "0000-0002-6009-8973"
 
   - name: "Harry Brown"
     groups:
@@ -196,9 +198,6 @@ members:
       - VIOS
     institution: "University of Edinburgh"
     orcid: "0000-0002-2281-9418"
-    openalex_id: "a5008578775"
-    required_collaborators:
-      - "Sotirios A. Tsaftaris"
 
   - name: "Danilo Bueno"
     groups:
