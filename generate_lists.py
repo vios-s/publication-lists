@@ -76,10 +76,10 @@ class ListGenerator:
         if self.polite_pool_email:
             print(f"  Using polite pool email: {self.polite_pool_email}")
 
-    def fetch_all_publications(self, from_year: Optional[int] = None):
+    def fetch_all_publications(self):
         print("\nFetching publications...")
-        if from_year:
-            print(f"  Filtering to publications from {from_year} onwards")
+        if self.from_year:
+            print(f"  Filtering to publications from {self.from_year} onwards")
 
         for person in self.people:
             name = person.get("name")
@@ -100,11 +100,9 @@ class ListGenerator:
                 else:
                     print("    ⚠️  Falling back to name search (less reliable)")
 
-            papers = self._fetch_from_openalex(name, orcid, from_year)
+            papers = self._fetch_from_openalex(name, orcid, self.from_year)
 
             for paper in papers:
-                if "groups" not in paper:
-                    paper["groups"] = []
                 paper["groups"].extend(groups)
                 paper["groups"] = list(set(paper["groups"]))  # Deduplicate
 
@@ -294,8 +292,6 @@ class ListGenerator:
                 if group_name in publication.get("groups", [])
             ]
 
-            group_publications.sort(key=self._get_publication_sort_key)
-
             filename = os.path.join(
                 self.output_dir,
                 f"{group_name.lower()}_publications.html"
@@ -308,7 +304,7 @@ class ListGenerator:
         print("=" * 60)
 
         self.load_config()
-        self.fetch_all_publications(self.from_year)
+        self.fetch_all_publications()
         self.add_manual_publications()
         self.filter_group_collaborators()
         self.generate_html_outputs()
@@ -453,7 +449,7 @@ class ListGenerator:
                       venue_type: Optional[str], display_type: str,
                       source: str, raw_data: Dict,
                       groups: Optional[List[str]] = None) -> Dict:
-        paper = {
+        return {
             "doi": doi,
             "title": title,
             "year": year,
@@ -466,13 +462,9 @@ class ListGenerator:
             "venue_type": venue_type,
             "display_type": display_type,
             "source": source,
-            "raw_data": raw_data
+            "raw_data": raw_data,
+            "groups": groups if groups is not None else []
         }
-
-        if groups is not None:
-            paper["groups"] = groups
-
-        return paper
 
     def _parse_openalex_work(self, work: Dict) -> Optional[Dict]:
         try:
@@ -518,7 +510,7 @@ class ListGenerator:
             print(f"    Warning: Failed to parse OpenAlex work: {e}")
             return None
 
-    def _extract_venue(self, work: Dict) -> str:
+    def _extract_venue(self, work: Dict) -> Optional[str]:
         primary_location = work.get("primary_location")
         if primary_location:
             source = primary_location.get("source")
@@ -724,12 +716,6 @@ class ListGenerator:
             file.write(html)
 
         print(f"  Wrote {len(publications)} publications to {filename}")
-
-    def _get_publication_sort_key(self, publication: Dict):
-        year = publication.get("year") or 0
-        date_str = publication.get("publication_date") or "0000-00-00"
-        date_int = int(date_str.replace("-", ""))
-        return (-year, -date_int)
 
     def _get_date_sort_key(self, publication: Dict):
         date_str = publication.get("publication_date") or "0000-00-00"
