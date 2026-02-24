@@ -20,15 +20,16 @@ python generate_lists.py
 Output: `output/{group}_publications.html` for each configured group.
 
 **Usage:**
-```bash
-python generate_lists.py                          # All groups, all years
-python generate_lists.py --from-year 2020         # Recent publications only
-python generate_lists.py --group VIOS             # Specific group
-python generate_lists.py --group VIOS --group CHAI --from-year 2020
-python generate_lists.py --render-only            # Re-render HTML from saved data (no API calls)
-python generate_lists.py --render-only --group VIOS  # Re-render one group only
-python generate_lists.py --data-file path/to/data.yaml --render-only  # Custom data file
-```
+
+| Command | Description |
+|---|---|
+| `python generate_lists.py` | All groups, all years |
+| `python generate_lists.py --from-year 2020` | Recent publications only |
+| `python generate_lists.py --group VIOS` | Specific group |
+| `python generate_lists.py --group VIOS --group CHAI --from-year 2020` | Multiple groups, recent only |
+| `python generate_lists.py --render-only` | Re-render HTML from saved data (no API calls) |
+| `python generate_lists.py --render-only --group VIOS` | Re-render one group only |
+| `python generate_lists.py --data-file path/to/data.yaml --render-only` | Custom data file |
 
 The script works in two stages:
 1. **Fetch** — queries OpenAlex APIs, merges with manual publications, applies filters, and saves a canonical data file (`output/publications_data.yaml`).

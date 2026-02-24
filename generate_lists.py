@@ -13,19 +13,34 @@ import time
 class ListGenerator:
 
     CONFERENCE_KEYWORDS = [
-        'conference', 'convention', 'congress', 'assembly', 'colloquium',
-        'seminar', 'workshop', 'forum', 'roundtable', 'summit',
-        'retreat', 'conclave', 'symposium', 'neural information processing systems'
+        "conference",
+        "convention",
+        "congress",
+        "assembly",
+        "colloquium",
+        "seminar",
+        "workshop",
+        "forum",
+        "roundtable",
+        "summit",
+        "retreat",
+        "conclave",
+        "symposium",
+        "neural information processing systems",
     ]
 
-    def __init__(self, people_file: str = "people.yaml", output_dir: str = "output",
-                 polite_pool_email: Optional[str] = None,
-                 groups: Optional[List[str]] = None,
-                 from_year: Optional[int] = None,
-                 exclusion_file: str = "excluded_dois.yaml",
-                 manual_file: str = "manual_publications.yaml",
-                 render_only: bool = False,
-                 data_file: Optional[str] = None):
+    def __init__(
+        self,
+        people_file: str = "people.yaml",
+        output_dir: str = "output",
+        polite_pool_email: Optional[str] = None,
+        groups: Optional[List[str]] = None,
+        from_year: Optional[int] = None,
+        exclusion_file: str = "excluded_dois.yaml",
+        manual_file: str = "manual_publications.yaml",
+        render_only: bool = False,
+        data_file: Optional[str] = None,
+    ):
         self.people_file = people_file
         self.output_dir = output_dir
         self.exclusion_file = exclusion_file
@@ -60,7 +75,8 @@ class ListGenerator:
 
         if self.selected_groups:
             invalid_groups = [
-                group for group in self.selected_groups
+                group
+                for group in self.selected_groups
                 if group not in self.group_config
             ]
             if invalid_groups:
@@ -72,13 +88,14 @@ class ListGenerator:
                 )
 
             self.group_config = {
-                group: self.group_config[group]
-                for group in self.selected_groups
+                group: self.group_config[group] for group in self.selected_groups
             }
             self.people = [
-                person for person in self.people
-                if any(group in self.selected_groups
-                       for group in person.get("groups", []))
+                person
+                for person in self.people
+                if any(
+                    group in self.selected_groups for group in person.get("groups", [])
+                )
             ]
 
         print(f"  Loaded {len(self.people)} group members")
@@ -132,14 +149,18 @@ class ListGenerator:
 
         for publication in self.manual_publications:
             publication_year = publication.get("year")
-            if (self.from_year and publication_year
-                    and publication_year < self.from_year):
+            if (
+                self.from_year
+                and publication_year
+                and publication_year < self.from_year
+            ):
                 continue
 
             publication_groups = publication.get("groups", [])
             if self.selected_groups:
                 publication_groups = [
-                    group for group in publication_groups
+                    group
+                    for group in publication_groups
                     if group in self.selected_groups
                 ]
                 if not publication_groups:
@@ -166,7 +187,7 @@ class ListGenerator:
                 display_type=publication.get("display_type", "articles"),
                 source="manual",
                 raw_data={"type": work_type},
-                groups=publication_groups
+                groups=publication_groups,
             )
 
             self._merge_papers([paper])
@@ -217,8 +238,7 @@ class ListGenerator:
 
                     for authorship in authorships:
                         member = self._find_member_for_authorship(
-                            authorship, group_name,
-                            members_by_orcid, members_by_name
+                            authorship, group_name, members_by_orcid, members_by_name
                         )
                         if member:
                             required_collabs.update(
@@ -232,8 +252,7 @@ class ListGenerator:
 
                         if not has_collaborator:
                             paper["groups"] = [
-                                group for group in groups
-                                if group != group_name
+                                group for group in groups if group != group_name
                             ]
                             removed_count += 1
 
@@ -277,8 +296,14 @@ class ListGenerator:
         }
 
         with open(self.data_file, "w") as f:
-            yaml.dump(data, f, default_flow_style=False, allow_unicode=True,
-                      sort_keys=False, width=120)
+            yaml.dump(
+                data,
+                f,
+                default_flow_style=False,
+                allow_unicode=True,
+                sort_keys=False,
+                width=120,
+            )
 
         print(f"  Saved {len(canonical_publications)} publications")
 
@@ -313,7 +338,8 @@ class ListGenerator:
                 if g in self.group_config
             }
             self.publications = {
-                k: v for k, v in self.publications.items()
+                k: v
+                for k, v in self.publications.items()
                 if any(g in self.selected_groups for g in v.get("groups", []))
             }
 
@@ -322,11 +348,12 @@ class ListGenerator:
     def generate_html_outputs(self):
         print("\nGenerating HTML outputs...")
 
-        env = Environment(loader=FileSystemLoader('templates'))
+        env = Environment(loader=FileSystemLoader("templates"))
 
         for group_name in self.group_config.keys():
             group_publications = [
-                publication for publication in self.publications.values()
+                publication
+                for publication in self.publications.values()
                 if group_name in publication.get("groups", [])
             ]
 
@@ -341,11 +368,9 @@ class ListGenerator:
                 template = env.get_template(default_template_name)
 
             filename = os.path.join(
-                self.output_dir,
-                f"{group_name.lower()}_publications.html"
+                self.output_dir, f"{group_name.lower()}_publications.html"
             )
-            self._generate_html_file(filename, group_publications, group_name,
-                                     template)
+            self._generate_html_file(filename, group_publications, group_name, template)
 
     def run(self):
         print("=" * 60)
@@ -369,9 +394,12 @@ class ListGenerator:
             print(f"  - {group_name.lower()}_publications.html")
         print("=" * 60)
 
-    def _fetch_from_openalex(self, author_name: str,
-                             orcid: Optional[str] = None,
-                             from_year: Optional[int] = None) -> List[Dict]:
+    def _fetch_from_openalex(
+        self,
+        author_name: str,
+        orcid: Optional[str] = None,
+        from_year: Optional[int] = None,
+    ) -> List[Dict]:
         papers = []
 
         try:
@@ -427,9 +455,9 @@ class ListGenerator:
 
         return papers
 
-    def _find_orcid_for_person(self, author_name: str,
-                               institution_name: Optional[str] = None
-                               ) -> Optional[str]:
+    def _find_orcid_for_person(
+        self, author_name: str, institution_name: Optional[str] = None
+    ) -> Optional[str]:
         try:
             print(f"    Attempting to find ORCID for {author_name}...")
 
@@ -441,20 +469,15 @@ class ListGenerator:
             given_name = name_parts[0]
             family_name = " ".join(name_parts[1:])
 
-            query_parts = [
-                f"given-names:{given_name}",
-                f"family-name:{family_name}"
-            ]
+            query_parts = [f"given-names:{given_name}", f"family-name:{family_name}"]
 
             if institution_name:
-                query_parts.append(f"affiliation-org-name:\"{institution_name}\"")
+                query_parts.append(f'affiliation-org-name:"{institution_name}"')
 
             query = "+AND+".join(query_parts)
             url = f"https://pub.orcid.org/v3.0/search/?q={query}&rows=5"
 
-            headers = {
-                "Accept": "application/json"
-            }
+            headers = {"Accept": "application/json"}
 
             response = requests.get(url, headers=headers, timeout=30)
             response.raise_for_status()
@@ -469,7 +492,9 @@ class ListGenerator:
             if len(results) > 1:
                 print(f"    Found {len(results)} possible matches:")
                 for i, result in enumerate(results[:3], 1):
-                    print(f"      {i}. ORCID: {self._extract_orcid_from_result(result)}")
+                    print(
+                        f"      {i}. ORCID: {self._extract_orcid_from_result(result)}"
+                    )
                 print("    Using first match (most relevant)")
 
             orcid = self._extract_orcid_from_result(results[0])
@@ -482,14 +507,23 @@ class ListGenerator:
 
         return None
 
-    def _create_paper(self, doi: Optional[str], title: str,
-                      year: Optional[int],
-                      publication_date: Optional[str], authors: List[str],
-                      venue: Optional[str], url: Optional[str],
-                      citation_count: int, work_type: str,
-                      venue_type: Optional[str], display_type: str,
-                      source: str, raw_data: Dict,
-                      groups: Optional[List[str]] = None) -> Dict:
+    def _create_paper(
+        self,
+        doi: Optional[str],
+        title: str,
+        year: Optional[int],
+        publication_date: Optional[str],
+        authors: List[str],
+        venue: Optional[str],
+        url: Optional[str],
+        citation_count: int,
+        work_type: str,
+        venue_type: Optional[str],
+        display_type: str,
+        source: str,
+        raw_data: Dict,
+        groups: Optional[List[str]] = None,
+    ) -> Dict:
         return {
             "doi": doi,
             "title": title,
@@ -504,7 +538,7 @@ class ListGenerator:
             "display_type": display_type,
             "source": source,
             "raw_data": raw_data,
-            "groups": groups if groups is not None else []
+            "groups": groups if groups is not None else [],
         }
 
     def _parse_openalex_work(self, work: Dict) -> Optional[Dict]:
@@ -542,7 +576,7 @@ class ListGenerator:
                 venue_type=venue_type,
                 display_type=display_type,
                 source="openalex",
-                raw_data=work
+                raw_data=work,
             )
 
             return paper if paper["title"] else None
@@ -560,34 +594,34 @@ class ListGenerator:
         source = location.get("source") or {}
         return source.get("display_name") or location.get("raw_source_name")
 
-    def _get_display_type(self, work_type: str, venue_type: Optional[str],
-                          venue: Optional[str]) -> str:
+    def _get_display_type(
+        self, work_type: str, venue_type: Optional[str], venue: Optional[str]
+    ) -> str:
         venue_lower = (venue or "").lower()
-        is_conference_venue = any(keyword in venue_lower for keyword in
-                                  self.CONFERENCE_KEYWORDS)
+        is_conference_venue = any(
+            keyword in venue_lower for keyword in self.CONFERENCE_KEYWORDS
+        )
 
-        if venue_type == 'journal' and work_type == 'article':
-            return 'journals'
-        elif venue_type == 'conference' and work_type == 'article':
-            return 'conferences'
-        elif is_conference_venue and work_type == 'article':
-            return 'conferences'
-        elif work_type == 'preprint':
-            return 'preprints'
-        elif work_type == 'book-chapter':
-            return 'books'
-        elif work_type == 'article':
-            return 'articles'
+        if venue_type == "journal" and work_type == "article":
+            return "journals"
+        elif venue_type == "conference" and work_type == "article":
+            return "conferences"
+        elif is_conference_venue and work_type == "article":
+            return "conferences"
+        elif work_type == "preprint":
+            return "preprints"
+        elif work_type == "book-chapter":
+            return "books"
+        elif work_type == "article":
+            return "articles"
         else:
-            return 'others'
+            return "others"
 
     def _should_prefer_over(self, paper: Dict, existing: Dict) -> bool:
         paper_venue = (paper.get("venue") or "").lower()
         existing_venue = (existing.get("venue") or "").lower()
 
-        paper_is_arxiv = (
-            "arxiv" in paper_venue or "cornell university" in paper_venue
-        )
+        paper_is_arxiv = "arxiv" in paper_venue or "cornell university" in paper_venue
         existing_is_arxiv = (
             "arxiv" in existing_venue or "cornell university" in existing_venue
         )
@@ -621,9 +655,13 @@ class ListGenerator:
             f"{paper.get('year', '')}"
         )
 
-    def _find_member_for_authorship(self, authorship: Dict, group_name: str,
-                                    members_by_orcid: Dict,
-                                    members_by_name: Dict) -> Optional[Dict]:
+    def _find_member_for_authorship(
+        self,
+        authorship: Dict,
+        group_name: str,
+        members_by_orcid: Dict,
+        members_by_name: Dict,
+    ) -> Optional[Dict]:
         author_info = authorship.get("author", {})
         author_name = author_info.get("display_name", "")
         author_orcid = (author_info.get("orcid") or "").replace(
@@ -745,9 +783,9 @@ class ListGenerator:
                 if norm:
                     title_index[norm] = new_key
 
-    def _generate_html_file(self, filename: str,
-                            publications: List[Dict], group: str,
-                            template):
+    def _generate_html_file(
+        self, filename: str, publications: List[Dict], group: str, template
+    ):
         by_year = defaultdict(list)
         for publication in publications:
             year = publication.get("year", "Unknown")
@@ -761,7 +799,7 @@ class ListGenerator:
             last_updated=datetime.now().strftime("%B %d, %Y at %I:%M %p"),
             total_publications=len(publications),
             years=sorted(by_year.keys(), reverse=True),
-            by_year=by_year
+            by_year=by_year,
         )
 
         with open(filename, "w") as file:
@@ -783,7 +821,7 @@ def main():
     parser.add_argument(
         "--from-year",
         type=int,
-        help="Fetch only publications from this year onwards (e.g., 2020)"
+        help="Fetch only publications from this year onwards (e.g., 2020)",
     )
     parser.add_argument(
         "--group",
@@ -792,7 +830,7 @@ def main():
         help=(
             "Run only for a specific group. "
             "Repeat for multiple groups (e.g., --group VIOS --group CHAI)."
-        )
+        ),
     )
     parser.add_argument(
         "--render-only",
@@ -800,13 +838,13 @@ def main():
         help=(
             "Skip fetching; re-render HTML from the existing data file. "
             "Useful for iterating on templates."
-        )
+        ),
     )
     parser.add_argument(
         "--data-file",
         type=str,
         default=None,
-        help="Path to the intermediate data file (default: output/publications_data.yaml)"
+        help="Path to the intermediate data file (default: publications_data.yaml)",
     )
     args = parser.parse_args()
 
