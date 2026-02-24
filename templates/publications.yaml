@@ -1,0 +1,10 @@
+{% for publication in publications -%}
+{%- set date = publication.publication_date or ((publication.year ~ '-01-01') if publication.year else None) -%}
+- title: {{ publication.title | toyaml }}
+  authors: {{ publication.authors | join(', ') | toyaml }}
+  venue: {{ publication.venue | toyaml }}
+  date: {{ date | toyaml }}
+  image: null
+  code: null
+  website: {{ publication.url | toyaml }}
+{% endfor %}

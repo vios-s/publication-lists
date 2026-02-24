@@ -40,6 +40,7 @@ class ListGenerator:
         manual_file: str = "manual_publications.yaml",
         render_only: bool = False,
         data_file: Optional[str] = None,
+        output_format: str = "html",
     ):
         self.people_file = people_file
         self.output_dir = output_dir
@@ -54,6 +55,7 @@ class ListGenerator:
         self.excluded_dois = set()
         self.manual_publications = []
         self.render_only = render_only
+        self.output_format = output_format
         self.data_file = data_file or os.path.join(output_dir, "publications_data.yaml")
 
         if polite_pool_email is None:
@@ -282,7 +284,9 @@ class ListGenerator:
 
         canonical_publications = []
         for paper in self.publications.values():
-            clean_paper = {k: v for k, v in paper.items() if k != "raw_data"}
+            clean_paper = {
+                field: value for field, value in paper.items() if field != "raw_data"
+            }
             canonical_publications.append(clean_paper)
 
         data = {
@@ -333,14 +337,14 @@ class ListGenerator:
 
         if self.selected_groups:
             self.group_config = {
-                g: self.group_config[g]
-                for g in self.selected_groups
-                if g in self.group_config
+                group: self.group_config[group]
+                for group in self.selected_groups
+                if group in self.group_config
             }
             self.publications = {
-                k: v
-                for k, v in self.publications.items()
-                if any(g in self.selected_groups for g in v.get("groups", []))
+                pub_key: pub
+                for pub_key, pub in self.publications.items()
+                if any(group in self.selected_groups for group in pub.get("groups", []))
             }
 
         print(f"  Loaded {len(self.publications)} publications")
@@ -386,13 +390,65 @@ class ListGenerator:
             self.filter_group_collaborators()
             self.save_data()
 
-        self.generate_html_outputs()
+        if self.output_format == "yaml":
+            self.generate_yaml_outputs()
+        else:
+            self.generate_html_outputs()
 
+        ext = self.output_format
         print("\n" + "=" * 60)
         print(f"Done! Generated files in '{self.output_dir}/' directory:")
         for group_name in self.group_config.keys():
-            print(f"  - {group_name.lower()}_publications.html")
+            print(f"  - {group_name.lower()}_publications.{ext}")
         print("=" * 60)
+
+    def generate_yaml_outputs(self):
+        print("\nGenerating YAML outputs...")
+
+        def toyaml(value):
+            """Serialize a single scalar value to a YAML-safe string."""
+            return yaml.dump(
+                value, default_flow_style=True, allow_unicode=True, width=float("inf")
+            ).split("\n")[0]
+
+        env = Environment(loader=FileSystemLoader("templates"))
+        env.filters["toyaml"] = toyaml
+
+        for group_name in self.group_config.keys():
+            group_publications = [
+                publication
+                for publication in self.publications.values()
+                if group_name in publication.get("groups", [])
+            ]
+
+            group_template_name = f"{group_name.lower()}_publications.yaml"
+            default_template_name = "publications.yaml"
+
+            template_path = os.path.join("templates", group_template_name)
+            if os.path.exists(template_path):
+                template = env.get_template(group_template_name)
+                print(f"  Using group template: {group_template_name}")
+            else:
+                template = env.get_template(default_template_name)
+
+            filename = os.path.join(
+                self.output_dir, f"{group_name.lower()}_publications.yaml"
+            )
+            self._generate_yaml_file(filename, group_publications, group_name, template)
+
+    def _generate_yaml_file(
+        self, filename: str, publications: List[Dict], group: str, template
+    ):
+        sorted_publications = sorted(publications, key=self._get_date_sort_key)
+
+        content = template.render(
+            publications=sorted_publications,
+        )
+
+        with open(filename, "w") as file:
+            file.write(content)
+
+        print(f"  Wrote {len(publications)} publications to {filename}")
 
     def _fetch_from_openalex(
         self,
@@ -491,10 +547,9 @@ class ListGenerator:
 
             if len(results) > 1:
                 print(f"    Found {len(results)} possible matches:")
-                for i, result in enumerate(results[:3], 1):
-                    print(
-                        f"      {i}. ORCID: {self._extract_orcid_from_result(result)}"
-                    )
+                for rank, result in enumerate(results[:3], 1):
+                    orcid = self._extract_orcid_from_result(result)
+                    print(f"      {rank}. ORCID: {orcid}")
                 print("    Using first match (most relevant)")
 
             orcid = self._extract_orcid_from_result(results[0])
@@ -846,6 +901,12 @@ def main():
         default=None,
         help="Path to the intermediate data file (default: publications_data.yaml)",
     )
+    parser.add_argument(
+        "--format",
+        choices=["html", "yaml"],
+        default="html",
+        help="Output format: html (default) or yaml",
+    )
     args = parser.parse_args()
 
     if args.from_year is not None:
@@ -867,6 +928,7 @@ def main():
             from_year=args.from_year,
             render_only=args.render_only,
             data_file=args.data_file,
+            output_format=args.format,
         )
         generator.run()
     except (ValueError, FileNotFoundError) as exc:
