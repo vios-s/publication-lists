@@ -12,12 +12,20 @@ import time
 
 class ListGenerator:
 
+    CONFERENCE_KEYWORDS = [
+        'conference', 'convention', 'congress', 'assembly', 'colloquium',
+        'seminar', 'workshop', 'forum', 'roundtable', 'summit',
+        'retreat', 'conclave', 'symposium', 'neural information processing systems'
+    ]
+
     def __init__(self, people_file: str = "people.yaml", output_dir: str = "output",
                  polite_pool_email: Optional[str] = None,
                  groups: Optional[List[str]] = None,
                  from_year: Optional[int] = None,
                  exclusion_file: str = "excluded_dois.yaml",
-                 manual_file: str = "manual_publications.yaml"):
+                 manual_file: str = "manual_publications.yaml",
+                 render_only: bool = False,
+                 data_file: Optional[str] = None):
         self.people_file = people_file
         self.output_dir = output_dir
         self.exclusion_file = exclusion_file
@@ -30,6 +38,8 @@ class ListGenerator:
         self.from_year = from_year
         self.excluded_dois = set()
         self.manual_publications = []
+        self.render_only = render_only
+        self.data_file = data_file or os.path.join(output_dir, "publications_data.yaml")
 
         if polite_pool_email is None:
             polite_pool_email = os.getenv("OPENALEX_EMAIL")
@@ -206,46 +216,11 @@ class ListGenerator:
                     authorships = paper.get("raw_data", {}).get("authorships", [])
 
                     for authorship in authorships:
-                        author_info = authorship.get("author", {})
-                        author_name = author_info.get("display_name", "")
-                        author_orcid = (author_info.get("orcid") or "").replace(
-                            "https://orcid.org/", ""
+                        member = self._find_member_for_authorship(
+                            authorship, group_name,
+                            members_by_orcid, members_by_name
                         )
-
-                        member = None
-
-                        # Priority 1: Match by ORCID (most reliable)
-                        if author_orcid and author_orcid in members_by_orcid:
-                            candidate = members_by_orcid[author_orcid]
-                            if group_name in candidate.get("groups", []):
-                                member = candidate
-
-                        # Priority 2: Exact name match
-                        if not member:
-                            candidate = members_by_name.get(author_name)
-                            if candidate and group_name in candidate.get("groups", []):
-                                member = candidate
-
-                        # Priority 3: Fuzzy name match (fallback)
-                        if not member:
-                            for member_name, member_data in members_by_name.items():
-                                if group_name not in member_data.get("groups", []):
-                                    continue
-
-                                # Simple fuzzy match: check if core name parts match
-                                author_parts = set(
-                                    author_name.lower().replace(".", "").split()
-                                )
-                                member_parts = set(
-                                    member_name.lower().replace(".", "").split()
-                                )
-
-                                # If member name parts are a subset of author parts
-                                if member_parts.issubset(author_parts):
-                                    member = member_data
-                                    break
-
-                        if member and group_name in member.get("groups", []):
+                        if member:
                             required_collabs.update(
                                 member.get("required_collaborators", [])
                             )
@@ -283,8 +258,71 @@ class ListGenerator:
         if not group_removals and not removed_completely:
             print("  No papers filtered (no groups have collaborator requirements)")
 
+    def save_data(self):
+        print(f"\nSaving publication data to {self.data_file}...")
+
+        canonical_publications = []
+        for paper in self.publications.values():
+            clean_paper = {k: v for k, v in paper.items() if k != "raw_data"}
+            canonical_publications.append(clean_paper)
+
+        data = {
+            "metadata": {
+                "generated_at": datetime.now().isoformat(),
+                "from_year": self.from_year,
+                "groups": list(self.group_config.keys()),
+                "total_publications": len(canonical_publications),
+            },
+            "publications": canonical_publications,
+        }
+
+        with open(self.data_file, "w") as f:
+            yaml.dump(data, f, default_flow_style=False, allow_unicode=True,
+                      sort_keys=False, width=120)
+
+        print(f"  Saved {len(canonical_publications)} publications")
+
+    def load_data(self):
+        print(f"\nLoading publication data from {self.data_file}...")
+
+        if not os.path.exists(self.data_file):
+            raise FileNotFoundError(
+                f"Data file not found: {self.data_file}. "
+                f"Run without --render-only first to fetch publications."
+            )
+
+        with open(self.data_file, "r") as f:
+            data = yaml.safe_load(f)
+
+        metadata = data.get("metadata", {})
+        print(f"  Data generated at: {metadata.get('generated_at', 'unknown')}")
+        print(f"  Groups in data: {', '.join(metadata.get('groups', []))}")
+
+        for paper in data.get("publications", []):
+            paper["raw_data"] = {}
+            self.publications[self._get_paper_key(paper)] = paper
+
+            for group in paper.get("groups", []):
+                if group not in self.group_config:
+                    self.group_config[group] = {}
+
+        if self.selected_groups:
+            self.group_config = {
+                g: self.group_config[g]
+                for g in self.selected_groups
+                if g in self.group_config
+            }
+            self.publications = {
+                k: v for k, v in self.publications.items()
+                if any(g in self.selected_groups for g in v.get("groups", []))
+            }
+
+        print(f"  Loaded {len(self.publications)} publications")
+
     def generate_html_outputs(self):
         print("\nGenerating HTML outputs...")
+
+        env = Environment(loader=FileSystemLoader('templates'))
 
         for group_name in self.group_config.keys():
             group_publications = [
@@ -292,21 +330,37 @@ class ListGenerator:
                 if group_name in publication.get("groups", [])
             ]
 
+            group_template_name = f"{group_name.lower()}_publications.html"
+            default_template_name = "publications.html"
+
+            template_path = os.path.join("templates", group_template_name)
+            if os.path.exists(template_path):
+                template = env.get_template(group_template_name)
+                print(f"  Using group template: {group_template_name}")
+            else:
+                template = env.get_template(default_template_name)
+
             filename = os.path.join(
                 self.output_dir,
                 f"{group_name.lower()}_publications.html"
             )
-            self._generate_html_file(filename, group_publications, group_name)
+            self._generate_html_file(filename, group_publications, group_name,
+                                     template)
 
     def run(self):
         print("=" * 60)
         print("Publication Lists")
         print("=" * 60)
 
-        self.load_config()
-        self.fetch_all_publications()
-        self.add_manual_publications()
-        self.filter_group_collaborators()
+        if self.render_only:
+            self.load_data()
+        else:
+            self.load_config()
+            self.fetch_all_publications()
+            self.add_manual_publications()
+            self.filter_group_collaborators()
+            self.save_data()
+
         self.generate_html_outputs()
 
         print("\n" + "=" * 60)
@@ -412,29 +466,16 @@ class ListGenerator:
                 print(f"    No ORCID found for {author_name}")
                 return None
 
-            # If we have exactly one match, use it
-            if len(results) == 1:
-                orcid_uri = results[0].get("orcid-identifier", {}).get("uri", "")
-                orcid = orcid_uri.replace("https://orcid.org/", "")
-                if orcid:
-                    print(f"    Found ORCID: {orcid}")
-                    return orcid
-
-            # Multiple matches - show options and pick first one
-            elif len(results) > 1:
+            if len(results) > 1:
                 print(f"    Found {len(results)} possible matches:")
                 for i, result in enumerate(results[:3], 1):
-                    orcid_uri = result.get("orcid-identifier", {}).get("uri", "")
-                    orcid = orcid_uri.replace("https://orcid.org/", "")
-                    print(f"      {i}. ORCID: {orcid}")
+                    print(f"      {i}. ORCID: {self._extract_orcid_from_result(result)}")
+                print("    Using first match (most relevant)")
 
-                # Pick the first match (sorted by relevance)
-                first_match = results[0]
-                orcid_uri = first_match.get("orcid-identifier", {}).get("uri", "")
-                orcid = orcid_uri.replace("https://orcid.org/", "")
-                if orcid:
-                    print(f"    Using first match (most relevant): {orcid}")
-                    return orcid
+            orcid = self._extract_orcid_from_result(results[0])
+            if orcid:
+                print(f"    Found ORCID: {orcid}")
+                return orcid
 
         except Exception as e:
             print(f"    Warning: ORCID lookup failed: {e}")
@@ -510,31 +551,20 @@ class ListGenerator:
             print(f"    Warning: Failed to parse OpenAlex work: {e}")
             return None
 
+    def _extract_orcid_from_result(result: Dict) -> str:
+        uri = result.get("orcid-identifier", {}).get("uri", "")
+        return uri.replace("https://orcid.org/", "")
+
     def _extract_venue(self, work: Dict) -> Optional[str]:
-        primary_location = work.get("primary_location")
-        if primary_location:
-            source = primary_location.get("source")
-            if source:
-                display_name = source.get("display_name")
-                if display_name:
-                    return display_name
-
-            raw_source_name = primary_location.get("raw_source_name")
-            if raw_source_name:
-                return raw_source_name
-
-        return None
+        location = work.get("primary_location") or {}
+        source = location.get("source") or {}
+        return source.get("display_name") or location.get("raw_source_name")
 
     def _get_display_type(self, work_type: str, venue_type: Optional[str],
                           venue: Optional[str]) -> str:
-        conference_keywords = [
-            'conference', 'convention', 'congress', 'assembly', 'colloquium',
-            'seminar', 'workshop', 'forum', 'roundtable', 'summit',
-            'retreat', 'conclave', 'symposium', 'neural information processing systems'
-        ]
         venue_lower = (venue or "").lower()
         is_conference_venue = any(keyword in venue_lower for keyword in
-                                  conference_keywords)
+                                  self.CONFERENCE_KEYWORDS)
 
         if venue_type == 'journal' and work_type == 'article':
             return 'journals'
@@ -562,8 +592,8 @@ class ListGenerator:
             "arxiv" in existing_venue or "cornell university" in existing_venue
         )
 
-        paper_type = paper.get("raw_data", {}).get("type", "")
-        existing_type = existing.get("raw_data", {}).get("type", "")
+        paper_type = paper.get("type", "")
+        existing_type = existing.get("type", "")
         paper_is_preprint = paper_type == "preprint"
         existing_is_preprint = existing_type == "preprint"
 
@@ -582,43 +612,86 @@ class ListGenerator:
         # If both are arXiv or both are not, prefer more complete info
         return len(str(paper)) > len(str(existing))
 
+    def _get_paper_key(self, paper: Dict) -> str:
+        doi = paper.get("doi")
+        if doi:
+            return doi
+        return (
+            f"{self._normalize_title(paper.get('title', ''))}_"
+            f"{paper.get('year', '')}"
+        )
+
+    def _find_member_for_authorship(self, authorship: Dict, group_name: str,
+                                    members_by_orcid: Dict,
+                                    members_by_name: Dict) -> Optional[Dict]:
+        author_info = authorship.get("author", {})
+        author_name = author_info.get("display_name", "")
+        author_orcid = (author_info.get("orcid") or "").replace(
+            "https://orcid.org/", ""
+        )
+
+        # Priority 1: Match by ORCID (most reliable)
+        if author_orcid and author_orcid in members_by_orcid:
+            candidate = members_by_orcid[author_orcid]
+            if group_name in candidate.get("groups", []):
+                return candidate
+
+        # Priority 2: Exact name match
+        candidate = members_by_name.get(author_name)
+        if candidate and group_name in candidate.get("groups", []):
+            return candidate
+
+        # Priority 3: Fuzzy name match (fallback)
+        for member_name, member_data in members_by_name.items():
+            if group_name not in member_data.get("groups", []):
+                continue
+            author_parts = set(author_name.lower().replace(".", "").split())
+            member_parts = set(member_name.lower().replace(".", "").split())
+            if member_parts.issubset(author_parts):
+                return member_data
+
+        return None
+
     def _normalize_title(self, title: str) -> str:
         if not title:
             return ""
         normalized = " ".join(title.lower().split())
         return normalized
 
-    def _load_excluded_dois(self):
-        if not os.path.exists(self.exclusion_file):
-            return
-
+    def _load_yaml_list(self, filepath: str, key: str) -> list:
+        if not os.path.exists(filepath):
+            return []
         try:
-            with open(self.exclusion_file, "r") as file:
+            with open(filepath, "r") as file:
                 data = yaml.safe_load(file)
-                if data and "excluded_dois" in data:
-                    self.excluded_dois = set(
-                        doi.lower() for doi in data["excluded_dois"]
-                    )
-                    print(f"  Loaded {len(self.excluded_dois)} excluded DOIs "
-                          f"from {self.exclusion_file}")
+                if data and key in data:
+                    items = data[key]
+                    print(f"  Loaded {len(items)} {key} from {filepath}")
+                    return items
         except Exception as e:
-            print(f"  Warning: Could not load {self.exclusion_file}: {e}")
+            print(f"  Warning: Could not load {filepath}: {e}")
+        return []
+
+    def _load_excluded_dois(self):
+        dois = self._load_yaml_list(self.exclusion_file, "excluded_dois")
+        self.excluded_dois = set(doi.lower() for doi in dois)
 
     def _load_manual_publications(self):
-        if not os.path.exists(self.manual_file):
-            return
+        self.manual_publications = self._load_yaml_list(
+            self.manual_file, "manual_publications"
+        )
 
-        try:
-            with open(self.manual_file, "r") as file:
-                data = yaml.safe_load(file)
-                if data and "manual_publications" in data:
-                    self.manual_publications = data["manual_publications"]
-                    print(f"  Loaded {len(self.manual_publications)} manual "
-                          f"publications from {self.manual_file}")
-        except Exception as e:
-            print(f"  Warning: Could not load {self.manual_file}: {e}")
+    def _build_title_index(self) -> Dict[str, str]:
+        index = {}
+        for key, paper in self.publications.items():
+            norm = self._normalize_title(paper.get("title", ""))
+            if norm:
+                index[norm] = key
+        return index
 
     def _merge_papers(self, papers: List[Dict]):
+        title_index = self._build_title_index()
+
         for paper in papers:
             doi = paper.get("doi")
             merged = False
@@ -637,12 +710,12 @@ class ListGenerator:
             if not merged:
                 paper_title = self._normalize_title(paper.get("title", ""))
                 paper_year = paper.get("year")
+                existing_key = title_index.get(paper_title) if paper_title else None
 
-                for key, existing in list(self.publications.items()):
-                    existing_title = self._normalize_title(existing.get("title", ""))
+                if existing_key and existing_key in self.publications:
+                    existing = self.publications[existing_key]
                     existing_year = existing.get("year")
 
-                    # Match if normalized titles match and years are close (<= 1 year)
                     years_match = (
                         not paper_year
                         or not existing_year
@@ -650,49 +723,31 @@ class ListGenerator:
                         or abs(paper_year - existing_year) <= 1
                     )
 
-                    if (
-                        paper_title and existing_title
-                        and paper_title == existing_title
-                        and years_match
-                    ):
-
-                        # Merge groups
+                    if years_match:
                         existing["groups"] = list(
                             set(existing["groups"] + paper["groups"])
                         )
 
-                        # Replace if new paper is better (e.g., published vs arXiv)
                         if self._should_prefer_over(paper, existing):
                             paper["groups"] = existing["groups"]
-                            # Remove old entry and add new one
-                            del self.publications[key]
-                            # Use DOI as key if available, otherwise
-                            # normalized title+year
-                            new_key = (
-                                doi
-                                if doi
-                                else f"{self._normalize_title(paper.get('title', ''))}"
-                                     f"_{paper_year}"
-                            )
+                            del self.publications[existing_key]
+                            new_key = self._get_paper_key(paper)
                             self.publications[new_key] = paper
+                            title_index[paper_title] = new_key
 
                         merged = True
-                        break
 
             # If still not merged, add as new paper
             if not merged:
-                if doi:
-                    self.publications[doi] = paper
-                else:
-                    # No DOI - use normalized title+year as fallback key
-                    key = (
-                        f"{self._normalize_title(paper.get('title', ''))}_"
-                        f"{paper.get('year', '')}"
-                    )
-                    self.publications[key] = paper
+                new_key = self._get_paper_key(paper)
+                self.publications[new_key] = paper
+                norm = self._normalize_title(paper.get("title", ""))
+                if norm:
+                    title_index[norm] = new_key
 
     def _generate_html_file(self, filename: str,
-                            publications: List[Dict], group: str):
+                            publications: List[Dict], group: str,
+                            template):
         by_year = defaultdict(list)
         for publication in publications:
             year = publication.get("year", "Unknown")
@@ -700,9 +755,6 @@ class ListGenerator:
 
         for year in by_year:
             by_year[year].sort(key=self._get_date_sort_key)
-
-        env = Environment(loader=FileSystemLoader('templates'))
-        template = env.get_template('publications.html')
 
         html = template.render(
             group=group,
@@ -742,6 +794,20 @@ def main():
             "Repeat for multiple groups (e.g., --group VIOS --group CHAI)."
         )
     )
+    parser.add_argument(
+        "--render-only",
+        action="store_true",
+        help=(
+            "Skip fetching; re-render HTML from the existing data file. "
+            "Useful for iterating on templates."
+        )
+    )
+    parser.add_argument(
+        "--data-file",
+        type=str,
+        default=None,
+        help="Path to the intermediate data file (default: output/publications_data.yaml)"
+    )
     args = parser.parse_args()
 
     if args.from_year is not None:
@@ -754,10 +820,18 @@ def main():
         if args.from_year < 1900:
             parser.error("--from-year must be 1900 or later")
 
+    if args.render_only and args.from_year is not None:
+        parser.error("--from-year has no effect with --render-only")
+
     try:
-        generator = ListGenerator(groups=args.groups, from_year=args.from_year)
+        generator = ListGenerator(
+            groups=args.groups,
+            from_year=args.from_year,
+            render_only=args.render_only,
+            data_file=args.data_file,
+        )
         generator.run()
-    except ValueError as exc:
+    except (ValueError, FileNotFoundError) as exc:
         parser.error(str(exc))
 
 

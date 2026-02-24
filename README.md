@@ -25,7 +25,16 @@ python generate_lists.py                          # All groups, all years
 python generate_lists.py --from-year 2020         # Recent publications only
 python generate_lists.py --group VIOS             # Specific group
 python generate_lists.py --group VIOS --group CHAI --from-year 2020
+python generate_lists.py --render-only            # Re-render HTML from saved data (no API calls)
+python generate_lists.py --render-only --group VIOS  # Re-render one group only
+python generate_lists.py --data-file path/to/data.yaml --render-only  # Custom data file
 ```
+
+The script works in two stages:
+1. **Fetch** — queries OpenAlex APIs, merges with manual publications, applies filters, and saves a canonical data file (`output/publications_data.yaml`).
+2. **Render** — reads the data file and generates HTML using per-group templates.
+
+Use `--render-only` to skip fetching and re-render instantly from the saved data. This is useful when iterating on templates.
 
 ## Configuration
 
@@ -117,7 +126,16 @@ members:
       - NewGroup
 ```
 
-3. Run the script - done! Output will be `output/newgroup_publications.html`
+3. (Optional) Create a custom template at `templates/newgroup_publications.html`. If none exists, the default `templates/publications.html` is used.
+
+4. Run the script - done! Output will be `output/newgroup_publications.html`
+
+### Templates
+
+Templates live in the `templates/` directory and use [Jinja2](https://jinja.palletsprojects.com/) syntax. The script resolves templates by convention:
+
+- `templates/{group}_publications.html` — used if it exists (e.g., `templates/vios_publications.html`)
+- `templates/publications.html` — default fallback
 
 ### Automation
 
