@@ -342,9 +342,12 @@ class ListGenerator:
                 if group in self.group_config
             }
             self.publications = {
-                pub_key: pub
-                for pub_key, pub in self.publications.items()
-                if any(group in self.selected_groups for group in pub.get("groups", []))
+                publication_key: publication
+                for publication_key, publication in self.publications.items()
+                if any(
+                    group in self.selected_groups
+                    for group in publication.get("groups", [])
+                )
             }
 
         print(f"  Loaded {len(self.publications)} publications")
@@ -380,6 +383,11 @@ class ListGenerator:
         print("=" * 60)
         print("Publication Lists")
         print("=" * 60)
+        print(f"  Groups:      {', '.join(self.selected_groups) if self.selected_groups else 'all'}")
+        print(f"  Format:      {self.output_format}")
+        print(f"  From year:   {self.from_year if self.from_year is not None else 'all'}")
+        print(f"  Render only: {self.render_only}")
+        print("=" * 60)
 
         if self.render_only:
             self.load_data()
@@ -405,14 +413,10 @@ class ListGenerator:
     def generate_yaml_outputs(self):
         print("\nGenerating YAML outputs...")
 
-        def toyaml(value):
-            """Serialize a single scalar value to a YAML-safe string."""
-            return yaml.dump(
-                value, default_flow_style=True, allow_unicode=True, width=float("inf")
-            ).split("\n")[0]
-
         env = Environment(loader=FileSystemLoader("templates"))
-        env.filters["toyaml"] = toyaml
+        env.filters["toyaml"] = lambda value: yaml.dump(
+            value, default_flow_style=True, allow_unicode=True, width=float("inf")
+        ).split("\n")[0]
 
         for group_name in self.group_config.keys():
             group_publications = [
