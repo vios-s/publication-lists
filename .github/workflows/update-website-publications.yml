@@ -18,12 +18,10 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      WEBSITE_REPO: "vios-s/tsaftarislab.github.io"
-      WEBSITE_BRANCH: "master"
+      WEBSITE_REPO: "vios-s/vios.science"
+      WEBSITE_BRANCH: "main"
       UPDATE_BRANCH: "publications-update"
-      TARGET_INCLUDE_PATH: "_includes/vios_publications.html"
-      GROUP: "VIOS"
-      YEAR: 2017
+      TARGET_INCLUDE_PATH: "src/data/publications.yaml"
 
     steps:
       - name: Checkout publication-lists repo
@@ -43,8 +41,8 @@ jobs:
         env:
           OPENALEX_EMAIL: ${{ secrets.OPENALEX_EMAIL }}
         run: |
-          python generate_lists.py --from-year "$YEAR" --group "$GROUP"
-          test -f output/vios_publications.html
+          python generate_lists.py --format yaml --group VIOS
+          test -f output/vios_publications.yaml
 
       - name: Checkout website repo
         uses: actions/checkout@v4
@@ -54,22 +52,22 @@ jobs:
           path: website
           token: ${{ secrets.WEBSITE_REPO_PAT }}
 
-      - name: Copy generated snippet into website repo
+      - name: Copy generated publications list into website repo
         run: |
           mkdir -p "website/$(dirname "${TARGET_INCLUDE_PATH}")"
-          cp "output/vios_publications.html" "website/${TARGET_INCLUDE_PATH}"
+          cp "output/vios_publications.yaml" "website/${TARGET_INCLUDE_PATH}"
 
       - name: Create or update PR
         uses: peter-evans/create-pull-request@v8
         with:
           path: website
           token: ${{ secrets.WEBSITE_REPO_PAT }}
-          commit-message: "Update publications snippet (VIOS)"
+          commit-message: "Update publications list"
           branch: ${{ env.UPDATE_BRANCH }}
           base: ${{ env.WEBSITE_BRANCH }}
           title: "Update publications"
           body: |
-            Automated update of `_includes/vios_publications.html` generated from OpenAlex.
+            Automated update of `src/data/publications.yaml` generated from OpenAlex.
 
             ✅ If everything looks correct:
             - Approve and merge this PR.
