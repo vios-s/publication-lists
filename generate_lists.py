@@ -383,9 +383,11 @@ class ListGenerator:
         print("=" * 60)
         print("Publication Lists")
         print("=" * 60)
-        print(f"  Groups:      {', '.join(self.selected_groups) if self.selected_groups else 'all'}")
+        groups_str = ', '.join(self.selected_groups) if self.selected_groups else 'all'
+        print(f"  Groups:      {groups_str}")
         print(f"  Format:      {self.output_format}")
-        print(f"  From year:   {self.from_year if self.from_year is not None else 'all'}")
+        from_year_str = self.from_year if self.from_year is not None else 'all'
+        print(f"  From year:   {from_year_str}")
         print(f"  Render only: {self.render_only}")
         print("=" * 60)
 
