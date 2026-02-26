@@ -12,23 +12,6 @@ import time
 
 class ListGenerator:
 
-    CONFERENCE_KEYWORDS = [
-        "conference",
-        "convention",
-        "congress",
-        "assembly",
-        "colloquium",
-        "seminar",
-        "workshop",
-        "forum",
-        "roundtable",
-        "summit",
-        "retreat",
-        "conclave",
-        "symposium",
-        "neural information processing systems",
-    ]
-
     def __init__(
         self,
         people_file: str = "people.yaml",
@@ -153,7 +136,9 @@ class ListGenerator:
         added_count = 0
 
         for publication in self.manual_publications:
-            publication_year = publication.get("year")
+            publication_date = publication["date"]
+            publication_year = int(publication_date[:4])
+
             if (
                 self.from_year
                 and publication_year
@@ -172,11 +157,6 @@ class ListGenerator:
                     continue
 
             work_type = publication.get("type", "article")
-            publication_date = publication.get("publication_date")
-            if not publication_date and publication_year:
-                publication_date = f"{publication_year}-01-01"
-            elif not publication_date:
-                publication_date = "0000-00-00"
 
             paper = self._create_paper(
                 doi=publication.get("doi"),
@@ -188,8 +168,6 @@ class ListGenerator:
                 url=publication.get("url") or publication.get("doi"),
                 citation_count=publication.get("citation_count", 0),
                 work_type=work_type,
-                venue_type=publication.get("venue_type"),
-                display_type=publication.get("display_type", "articles"),
                 source="manual",
                 raw_data={"type": work_type},
                 groups=publication_groups,
@@ -586,8 +564,6 @@ class ListGenerator:
         url: Optional[str],
         citation_count: int,
         work_type: str,
-        venue_type: Optional[str],
-        display_type: str,
         source: str,
         raw_data: Dict,
         groups: Optional[List[str]] = None,
@@ -602,8 +578,6 @@ class ListGenerator:
             "url": url,
             "citation_count": citation_count,
             "type": work_type,
-            "venue_type": venue_type,
-            "display_type": display_type,
             "source": source,
             "raw_data": raw_data,
             "groups": groups if groups is not None else [],
@@ -618,14 +592,7 @@ class ListGenerator:
 
             work_type = work.get("type", "")
             venue = self._extract_venue(work)
-            venue_type = None
-            primary_location = work.get("primary_location")
-            if primary_location:
-                source = primary_location.get("source")
-                if source:
-                    venue_type = source.get("type")
 
-            display_type = self._get_display_type(work_type, venue_type, venue)
             authors = [
                 self._resolve_author_name(authorship)
                 for authorship in work.get("authorships", [])
@@ -641,8 +608,6 @@ class ListGenerator:
                 url=work.get("doi") or work.get("id", ""),
                 citation_count=work.get("cited_by_count", 0),
                 work_type=work_type,
-                venue_type=venue_type,
-                display_type=display_type,
                 source="openalex",
                 raw_data=work,
             )
@@ -661,29 +626,6 @@ class ListGenerator:
         location = work.get("primary_location") or {}
         source = location.get("source") or {}
         return source.get("display_name") or location.get("raw_source_name")
-
-    def _get_display_type(
-        self, work_type: str, venue_type: Optional[str], venue: Optional[str]
-    ) -> str:
-        venue_lower = (venue or "").lower()
-        is_conference_venue = any(
-            keyword in venue_lower for keyword in self.CONFERENCE_KEYWORDS
-        )
-
-        if venue_type == "journal" and work_type == "article":
-            return "journals"
-        elif venue_type == "conference" and work_type == "article":
-            return "conferences"
-        elif is_conference_venue and work_type == "article":
-            return "conferences"
-        elif work_type == "preprint":
-            return "preprints"
-        elif work_type == "book-chapter":
-            return "books"
-        elif work_type == "article":
-            return "articles"
-        else:
-            return "others"
 
     def _should_prefer_over(self, paper: Dict, existing: Dict) -> bool:
         paper_venue = (paper.get("venue") or "").lower()
@@ -779,7 +721,7 @@ class ListGenerator:
         if not raw_name:
             return ""
         if "," in raw_name:
-            parts = [p.strip() for p in raw_name.split(",", 1)]
+            parts = [part.strip() for part in raw_name.split(",", 1)]
             if len(parts) == 2 and parts[1]:
                 return f"{parts[1]} {parts[0]}"
         return raw_name

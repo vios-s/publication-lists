@@ -81,7 +81,7 @@ manual_publications:
     authors:
       - "First Author"
       - "Second Author"
-    year: 2024
+    date: "2024-01-01"
     groups:
       - VIOS
     venue: "Conference Name"  # Optional
@@ -89,7 +89,7 @@ manual_publications:
     url: "https://..."        # Optional, used if no DOI
 ```
 
-Required fields: `title`, `authors`, `year`, `groups`. All other fields are optional.
+Required fields: `title`, `authors`, `date` (`YYYY-MM-DD`), `groups`. All other fields are optional.
 
 **Note:** Manual publications bypass the collaborator filter. They are always included in the output for their specified groups, regardless of `required_collaborators` settings.
 
