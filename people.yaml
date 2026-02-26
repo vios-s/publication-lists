@@ -179,8 +179,6 @@ members:
     groups:
       - VIOS
     institution: "National and Kapodistrian University of Athens"
-    aliases:
-      - "Θωμάς Μελίστας"
 
   - name: "Yongcheng Yao"
     groups:
@@ -354,5 +352,3 @@ members:
     groups:
       - CHAI
     institution: "University of Manchester"
-    aliases:
-      - "Sarah Riley"

@@ -63,9 +63,6 @@ members:
     institution: "University Name"  # Optional, helps ORCID lookup
     required_collaborators:  # Optional, additional per-member requirements
       - "Specific Advisor"
-    aliases:  # Optional, alternate names used by OpenAlex
-      - "Researcher, Name"
-      - "Ρησέρτσερ Νέιμ"
 ```
 
 **Key points:**
@@ -73,7 +70,6 @@ members:
 - Script auto-attempts ORCID lookup if missing
 - Collaborator requirements combine group + member level
 - Empty `required_collaborators: []` means no filtering
-- `aliases` maps alternate OpenAlex names to the member `name` (exact string match)
 
 ### manual_publications.yaml
 

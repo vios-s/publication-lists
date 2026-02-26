@@ -627,10 +627,8 @@ class ListGenerator:
 
             display_type = self._get_display_type(work_type, venue_type, venue)
             authors = [
-                self._canonicalize_author_name(
-                    author.get("author", {}).get("display_name", "")
-                )
-                for author in work.get("authorships", [])
+                self._resolve_author_name(authorship)
+                for authorship in work.get("authorships", [])
             ]
 
             paper = self._create_paper(
@@ -737,26 +735,33 @@ class ListGenerator:
         author_orcid = (author_info.get("orcid") or "").replace(
             "https://orcid.org/", ""
         )
+        raw_author_name = authorship.get("raw_author_name", "")
+        cleaned_raw = self._clean_raw_author_name(raw_author_name)
 
-        # Priority 1: Match by ORCID (most reliable)
+        # Priority 1: Match by ORCID (most reliable when correct)
         if author_orcid and author_orcid in members_by_orcid:
             candidate = members_by_orcid[author_orcid]
             if group_name in candidate.get("groups", []):
                 return candidate
 
-        # Priority 2: Exact name match
-        candidate = members_by_name.get(author_name)
-        if candidate and group_name in candidate.get("groups", []):
-            return candidate
+        # Priority 2: Exact name match (display_name or raw_author_name)
+        for name_variant in [author_name, cleaned_raw, raw_author_name]:
+            candidate = members_by_name.get(name_variant)
+            if candidate and group_name in candidate.get("groups", []):
+                return candidate
 
-        # Priority 3: Fuzzy name match (fallback)
-        for member_name, member_data in members_by_name.items():
-            if group_name not in member_data.get("groups", []):
+        # Priority 3: Fuzzy name match against all name variants (fallback)
+        name_variants = {author_name, cleaned_raw, raw_author_name}
+        for variant in name_variants:
+            if not variant:
                 continue
-            author_parts = set(author_name.lower().replace(".", "").split())
-            member_parts = set(member_name.lower().replace(".", "").split())
-            if member_parts.issubset(author_parts):
-                return member_data
+            for member_name, member_data in members_by_name.items():
+                if group_name not in member_data.get("groups", []):
+                    continue
+                variant_parts = set(variant.lower().replace(".", "").split())
+                member_parts = set(member_name.lower().replace(".", "").split())
+                if member_parts.issubset(variant_parts):
+                    return member_data
 
         return None
 
@@ -769,16 +774,33 @@ class ListGenerator:
                 continue
 
             self.author_name_map[canonical_name] = canonical_name
-            aliases = member.get("aliases", [])
-            if isinstance(aliases, list):
-                for alias in aliases:
-                    if alias:
-                        self.author_name_map[alias] = canonical_name
 
-    def _canonicalize_author_name(self, author_name: str) -> str:
-        if not author_name:
+    def _clean_raw_author_name(self, raw_name: str) -> str:
+        if not raw_name:
             return ""
-        return self.author_name_map.get(author_name, author_name)
+        if "," in raw_name:
+            parts = [p.strip() for p in raw_name.split(",", 1)]
+            if len(parts) == 2 and parts[1]:
+                return f"{parts[1]} {parts[0]}"
+        return raw_name
+
+    def _resolve_author_name(self, authorship: Dict) -> str:
+        display_name = authorship.get("author", {}).get("display_name", "")
+        raw_name = authorship.get("raw_author_name", "")
+        cleaned_raw = self._clean_raw_author_name(raw_name)
+
+        canonical_from_raw = self.author_name_map.get(cleaned_raw)
+        canonical_from_raw_original = self.author_name_map.get(raw_name)
+        canonical_from_display = self.author_name_map.get(display_name)
+
+        if canonical_from_raw:
+            return canonical_from_raw
+        if canonical_from_raw_original:
+            return canonical_from_raw_original
+        if canonical_from_display:
+            return canonical_from_display
+
+        return display_name or cleaned_raw or raw_name
 
     def _normalize_title(self, title: str) -> str:
         if not title:
