@@ -179,6 +179,8 @@ members:
     groups:
       - VIOS
     institution: "National and Kapodistrian University of Athens"
+    aliases:
+      - "Θωμάς Μελίστας"
 
   - name: "Yongcheng Yao"
     groups:
@@ -347,3 +349,10 @@ members:
     groups:
       - CHAI
     orcid: "0000-0002-4816-8991"
+
+  - name: "Stephanie Riley"
+    groups:
+      - CHAI
+    institution: "University of Manchester"
+    aliases:
+      - "Sarah Riley"

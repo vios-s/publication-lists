@@ -50,6 +50,7 @@ class ListGenerator:
         self.group_config = {}
         self.publications = {}
         self.discovered_orcids = {}
+        self.author_name_map = {}
         self.selected_groups = groups
         self.from_year = from_year
         self.excluded_dois = set()
@@ -69,9 +70,11 @@ class ListGenerator:
 
         with open(self.people_file, "r") as file:
             config = yaml.safe_load(file)
-            self.people = config.get("members", [])
+            all_members = config.get("members", [])
+            self.people = all_members
             self.group_config = config.get("groups", {})
 
+        self._build_author_name_map(all_members)
         self._load_excluded_dois()
         self._load_manual_publications()
 
@@ -624,7 +627,9 @@ class ListGenerator:
 
             display_type = self._get_display_type(work_type, venue_type, venue)
             authors = [
-                author.get("author", {}).get("display_name", "")
+                self._canonicalize_author_name(
+                    author.get("author", {}).get("display_name", "")
+                )
                 for author in work.get("authorships", [])
             ]
 
@@ -754,6 +759,26 @@ class ListGenerator:
                 return member_data
 
         return None
+
+    def _build_author_name_map(self, members: Optional[List[Dict]] = None):
+        self.author_name_map = {}
+        source_members = members if members is not None else self.people
+        for member in source_members:
+            canonical_name = member.get("name")
+            if not canonical_name:
+                continue
+
+            self.author_name_map[canonical_name] = canonical_name
+            aliases = member.get("aliases", [])
+            if isinstance(aliases, list):
+                for alias in aliases:
+                    if alias:
+                        self.author_name_map[alias] = canonical_name
+
+    def _canonicalize_author_name(self, author_name: str) -> str:
+        if not author_name:
+            return ""
+        return self.author_name_map.get(author_name, author_name)
 
     def _normalize_title(self, title: str) -> str:
         if not title:
