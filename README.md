@@ -50,19 +50,19 @@ Defines groups and members:
 groups:
   VIOS:
     required_collaborators:
-      - "Principal Investigator"  # Papers need this collaborator
+      - Principal Investigator  # Papers need this collaborator
   CHAI:
     required_collaborators: []    # No filtering
 
 members:
-  - name: "Researcher Name"
+  - name: Researcher Name
     groups:
       - CHAI
       - VIOS  # Can belong to multiple groups
-    orcid: "0000-0000-0000-0000"  # Recommended for accuracy
-    institution: "University Name"  # Optional, helps ORCID lookup
+    orcid: 0000-0000-0000-0000  # Recommended for accuracy
+    institution: University Name  # Optional, helps ORCID lookup
     required_collaborators:  # Optional, additional per-member requirements
-      - "Specific Advisor"
+      - Specific Advisor
 ```
 
 **Key points:**
@@ -77,16 +77,16 @@ Manually add publications not found in OpenAlex:
 
 ```yaml
 manual_publications:
-  - title: "Your Paper Title"
+  - title: Your Paper Title
     authors:
-      - "First Author"
-      - "Second Author"
+      - First Author
+      - Second Author
     date: "2024-01-01"
     groups:
       - VIOS
-    venue: "Conference Name"  # Optional
-    doi: "10.1234/example"    # Optional
-    url: "https://..."        # Optional, used if no DOI
+    venue: Conference Name  # Optional
+    doi: 10.1234/example    # Optional
+    url: https://...        # Optional
 ```
 
 Required fields: `title`, `authors`, `date` (`YYYY-MM-DD`), `groups`. All other fields are optional.
@@ -99,8 +99,8 @@ Exclude incorrectly attributed publications:
 
 ```yaml
 excluded_dois:
-  - "10.1234/wrong.paper"
-  - "10.5678/another.wrong"
+  - 10.1234/wrong.paper
+  - 10.5678/another.wrong
 ```
 
 ### .env
@@ -125,7 +125,7 @@ groups:
 2. Tag members with the group:
 ```yaml
 members:
-  - name: "Member Name"
+  - name: Member Name
     groups:
       - NewGroup
 ```

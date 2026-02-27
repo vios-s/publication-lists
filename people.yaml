@@ -1,354 +1,354 @@
 groups:
   VIOS:
     required_collaborators:
-      - "Sotirios A. Tsaftaris"
-      - "Steven McDonagh"
-      - "Mario Valerio Giuffrida"
+      - Sotirios A. Tsaftaris
+      - Steven McDonagh
+      - Mario Valerio Giuffrida
   CHAI:
     required_collaborators:
-      - "Sotirios A. Tsaftaris"
-      - "Hana Chockler"
-      - "Matthew Sperrin"
-      - "Ricardo Silva"
-      - "Ben Glocker"
-      - "Niccolo Tempini"
+      - Sotirios A. Tsaftaris
+      - Hana Chockler
+      - Matthew Sperrin
+      - Ricardo Silva
+      - Ben Glocker
+      - Niccolo Tempini
 
 members:
-  - name: "Sotirios A. Tsaftaris"
+  - name: Sotirios A. Tsaftaris
     groups:
       - VIOS
       - CHAI
-    institution: "University of Edinburgh"
-    orcid: "0000-0002-8795-9294"
+    institution: University of Edinburgh
+    orcid: 0000-0002-8795-9294
 
-  - name: "Steven McDonagh"
+  - name: Steven McDonagh
     groups:
       - VIOS
       - CHAI
-    institution: "University of Edinburgh"
-    orcid: "0000-0001-7025-5197"
+    institution: University of Edinburgh
+    orcid: 0000-0001-7025-5197
 
-  - name: "Mario Valerio Giuffrida"
+  - name: Mario Valerio Giuffrida
     groups:
       - VIOS
-    institution: "University of Nottingham"
-    orcid: "0000-0002-5232-677X"
+    institution: University of Nottingham
+    orcid: 0000-0002-5232-677X
 
-  - name: "Alison O'Neil"
+  - name: Alison O'Neil
     groups:
       - VIOS
-    institution: "University of Edinburgh"
-    orcid: "0000-0001-8371-0603"
+    institution: University of Edinburgh
+    orcid: 0000-0001-8371-0603
 
-  - name: "Michael Camilleri"
-    groups:
-      - VIOS
-      - CHAI
-    institution: "University of Edinburgh"
-    orcid: "0000-0002-8619-3231"
-
-  - name: "Damian Machlanski"
+  - name: Michael Camilleri
     groups:
       - VIOS
       - CHAI
-    institution: "University of Edinburgh"
-    orcid: "0000-0003-4819-8565"
+    institution: University of Edinburgh
+    orcid: 0000-0002-8619-3231
 
-  - name: "Edward Moroshko"
-    groups:
-      - VIOS
-    institution: "University of Edinburgh"
-
-  - name: "Feng Chen"
-    groups:
-      - VIOS
-    institution: "University of Edinburgh"
-    orcid: "0000-0003-2915-599X"
-
-  - name: "Kurt Butler"
+  - name: Damian Machlanski
     groups:
       - VIOS
       - CHAI
-    institution: "University of Edinburgh"
-    orcid: "0000-0002-1520-4909"
+    institution: University of Edinburgh
+    orcid: 0000-0003-4819-8565
 
-  - name: "Panos Dimitrakopoulos"
+  - name: Edward Moroshko
+    groups:
+      - VIOS
+    institution: University of Edinburgh
+
+  - name: Feng Chen
+    groups:
+      - VIOS
+    institution: University of Edinburgh
+    orcid: 0000-0003-2915-599X
+
+  - name: Kurt Butler
     groups:
       - VIOS
       - CHAI
-    institution: "University of Edinburgh"
-    orcid: "0009-0002-2631-4043"
+    institution: University of Edinburgh
+    orcid: 0000-0002-1520-4909
 
-  - name: "Zhihua Liu"
+  - name: Panos Dimitrakopoulos
     groups:
       - VIOS
       - CHAI
-    institution: "University of Edinburgh"
-    orcid: "0000-0001-8272-8238"
+    institution: University of Edinburgh
+    orcid: 0009-0002-2631-4043
 
-  - name: "Analía Cabello Cano"
+  - name: Zhihua Liu
     groups:
       - VIOS
       - CHAI
-    institution: "University of Edinburgh"
+    institution: University of Edinburgh
+    orcid: 0000-0001-8272-8238
 
-  - name: "Christopher Boland"
-    groups:
-      - VIOS
-    institution: "University of Edinburgh"
-    orcid: "0009-0004-2398-6252"
-
-  - name: "Connor Jordan"
-    groups:
-      - VIOS
-    institution: "University of Edinburgh"
-    orcid: "0000-0002-6009-8973"
-
-  - name: "Harry Brown"
-    groups:
-      - VIOS
-    institution: "University of Edinburgh"
-
-  - name: "Ilias Stogiannidis"
-    groups:
-      - VIOS
-    institution: "University of Edinburgh"
-    orcid: "0009-0005-5803-1138"
-
-  - name: "Junyu Yan"
+  - name: Analía Cabello Cano
     groups:
       - VIOS
       - CHAI
-    institution: "University of Edinburgh"
-    orcid: "0009-0003-0311-5559"
+    institution: University of Edinburgh
 
-  - name: "Keying Guo"
+  - name: Christopher Boland
+    groups:
+      - VIOS
+    institution: University of Edinburgh
+    orcid: 0009-0004-2398-6252
+
+  - name: Connor Jordan
+    groups:
+      - VIOS
+    institution: University of Edinburgh
+    orcid: 0000-0002-6009-8973
+
+  - name: Harry Brown
+    groups:
+      - VIOS
+    institution: University of Edinburgh
+
+  - name: Ilias Stogiannidis
+    groups:
+      - VIOS
+    institution: University of Edinburgh
+    orcid: 0009-0005-5803-1138
+
+  - name: Junyu Yan
     groups:
       - VIOS
       - CHAI
-    institution: "University of Edinburgh"
+    institution: University of Edinburgh
+    orcid: 0009-0003-0311-5559
 
-  - name: "Konstantinos Vilouras"
-    groups:
-      - VIOS
-    institution: "University of Edinburgh"
-    orcid: "0009-0003-5910-9748"
-
-  - name: "George Lansdown"
-    groups:
-      - VIOS
-    institution: "University of Edinburgh"
-
-  - name: "Madhav Agarwal"
-    groups:
-      - VIOS
-    institution: "University of Edinburgh"
-    orcid: "0000-0001-8267-1024"
-
-  - name: "Nefeli Gkouti"
-    groups:
-      - VIOS
-    institution: "National and Kapodistrian University of Athens"
-
-  - name: "Nikos Spyrou"
-    groups:
-      - VIOS
-    institution: "National and Kapodistrian University of Athens"
-    orcid: "0009-0006-9238-0224"
-
-  - name: "Odyssefs Diamantopoulos Pantaleon"
+  - name: Keying Guo
     groups:
       - VIOS
       - CHAI
-    institution: "University of Edinburgh"
-    orcid: "0009-0009-0830-4512"
+    institution: University of Edinburgh
 
-  - name: "Raman Dutt"
+  - name: Konstantinos Vilouras
     groups:
       - VIOS
-    institution: "University of Edinburgh"
-    orcid: "0009-0005-6908-4171"
+    institution: University of Edinburgh
+    orcid: 0009-0003-5910-9748
 
-  - name: "Robert Cronshaw"
+  - name: George Lansdown
+    groups:
+      - VIOS
+    institution: University of Edinburgh
+
+  - name: Madhav Agarwal
+    groups:
+      - VIOS
+    institution: University of Edinburgh
+    orcid: 0000-0001-8267-1024
+
+  - name: Nefeli Gkouti
+    groups:
+      - VIOS
+    institution: National and Kapodistrian University of Athens
+
+  - name: Nikos Spyrou
+    groups:
+      - VIOS
+    institution: National and Kapodistrian University of Athens
+    orcid: 0009-0006-9238-0224
+
+  - name: Odyssefs Diamantopoulos Pantaleon
     groups:
       - VIOS
       - CHAI
-    institution: "University of Edinburgh"
+    institution: University of Edinburgh
+    orcid: 0009-0009-0830-4512
 
-  - name: "Thomas Melistas"
+  - name: Raman Dutt
     groups:
       - VIOS
-    institution: "National and Kapodistrian University of Athens"
+    institution: University of Edinburgh
+    orcid: 0009-0005-6908-4171
 
-  - name: "Yongcheng Yao"
+  - name: Robert Cronshaw
     groups:
       - VIOS
-    institution: "University of Edinburgh"
-    orcid: "0000-0003-2754-3649"
+      - CHAI
+    institution: University of Edinburgh
 
-  - name: "Yuning Du"
+  - name: Thomas Melistas
     groups:
       - VIOS
-    institution: "University of Edinburgh"
+    institution: National and Kapodistrian University of Athens
+
+  - name: Yongcheng Yao
+    groups:
+      - VIOS
+    institution: University of Edinburgh
+    orcid: 0000-0003-2754-3649
+
+  - name: Yuning Du
+    groups:
+      - VIOS
+    institution: University of Edinburgh
     orcid: 0009-0007-4995-5472
 
-  - name: "Yuyang Xue"
+  - name: Yuyang Xue
     groups:
       - CHAI
       - VIOS
-    institution: "University of Edinburgh"
-    orcid: "0000-0002-2281-9418"
+    institution: University of Edinburgh
+    orcid: 0000-0002-2281-9418
 
-  - name: "Danilo Bueno"
+  - name: Danilo Bueno
     groups:
       - CHAI
       - VIOS
-    institution: "University of Edinburgh"
-    orcid: "0009-0008-3036-7010"
+    institution: University of Edinburgh
+    orcid: 0009-0008-3036-7010
 
-  - name: "Junyi Gao"
+  - name: Junyi Gao
     groups:
       - VIOS
-    institution: "University of Edinburgh"
-    orcid: "0000-0002-4951-8682"
+    institution: University of Edinburgh
+    orcid: 0000-0002-4951-8682
 
-  - name: "Hana Chockler"
+  - name: Hana Chockler
     groups:
       - CHAI
-    orcid: "0000-0003-1219-0713"
+    orcid: 0000-0003-1219-0713
 
-  - name: "Matthew Sperrin"
+  - name: Matthew Sperrin
     groups:
       - CHAI
-    orcid: "0000-0002-5351-9960"
+    orcid: 0000-0002-5351-9960
 
-  - name: "Ricardo Silva"
+  - name: Ricardo Silva
     groups:
       - CHAI
-    institution: "University College London"
-    orcid: "0000-0002-6502-9563"
+    institution: University College London
+    orcid: 0000-0002-6502-9563
 
-  - name: "Ben Glocker"
+  - name: Ben Glocker
     groups:
       - CHAI
-    orcid: "0000-0002-4897-9356"
+    orcid: 0000-0002-4897-9356
 
-  - name: "Niccolo Tempini"
+  - name: Niccolo Tempini
     groups:
       - CHAI
-    orcid: "0000-0002-5100-5376"
+    orcid: 0000-0002-5100-5376
 
-  - name: "Fabio de Sousa Ribeiro"
+  - name: Fabio de Sousa Ribeiro
     groups:
       - CHAI
-    orcid: "0000-0002-6195-5658"
+    orcid: 0000-0002-6195-5658
 
-  - name: "Sjoerd Beentjes"
+  - name: Sjoerd Beentjes
     groups:
       - CHAI
-    orcid: "0000-0002-7998-4262"
+    orcid: 0000-0002-7998-4262
 
-  - name: "David Kelly"
+  - name: David Kelly
     groups:
       - CHAI
-    orcid: "0000-0002-5368-6769"
+    orcid: 0000-0002-5368-6769
 
-  - name: "Akchunya Chanchal"
+  - name: Akchunya Chanchal
     groups:
       - CHAI
-    orcid: "0000-0003-2571-0802"
+    orcid: 0000-0003-2571-0802
 
-  - name: "Nathan Blake"
+  - name: Nathan Blake
     groups:
       - CHAI
-    orcid: "0000-0002-6404-514X"
+    orcid: 0000-0002-6404-514X
 
-  - name: "Melane Navaratnarajah"
+  - name: Melane Navaratnarajah
     groups:
       - CHAI
-    orcid: "0009-0001-8987-6134"
+    orcid: 0009-0001-8987-6134
 
-  - name: "Alexander Pate"
+  - name: Alexander Pate
     groups:
       - CHAI
-    orcid: "0000-0002-0849-3458"
+    orcid: 0000-0002-0849-3458
 
-  - name: "Asantewaa Sarpong"
+  - name: Asantewaa Sarpong
     groups:
       - CHAI
-    orcid: "0009-0009-0980-7656"
+    orcid: 0009-0009-0980-7656
 
-  - name: "Daniel Alexander"
+  - name: Daniel Alexander
     groups:
       - CHAI
-    orcid: "0000-0003-2439-350X"
+    orcid: 0000-0003-2439-350X
 
-  - name: "Sohan Seth"
+  - name: Sohan Seth
     groups:
       - CHAI
-    orcid: "0000-0002-7464-4752"
+    orcid: 0000-0002-7464-4752
 
-  - name: "Javier Escudero Rodriguez"
+  - name: Javier Escudero Rodriguez
     groups:
       - CHAI
-    orcid: "0000-0002-2105-8725"
+    orcid: 0000-0002-2105-8725
 
-  - name: "Hui Guo"
+  - name: Hui Guo
     groups:
       - CHAI
-    orcid: "0000-0003-0282-6933"
+    orcid: 0000-0003-0282-6933
 
-  - name: "Henry Gouk"
+  - name: Henry Gouk
     groups:
       - CHAI
-    orcid: "0000-0002-0924-2933"
+    orcid: 0000-0002-0924-2933
 
-  - name: "Yulan He"
+  - name: Yulan He
     groups:
       - CHAI
-    orcid: "0000-0003-3948-5845"
+    orcid: 0000-0003-3948-5845
 
-  - name: "Bruce Guthrie"
+  - name: Bruce Guthrie
     groups:
       - CHAI
-    orcid: "0000-0003-4191-4880"
+    orcid: 0000-0003-4191-4880
 
-  - name: "Stephen Guttinger"
+  - name: Stephen Guttinger
     groups:
       - CHAI
-    orcid: "0000-0001-9448-973X"
+    orcid: 0000-0001-9448-973X
 
-  - name: "Ava Khamseh"
+  - name: Ava Khamseh
     groups:
       - CHAI
-    orcid: "0000-0001-5203-2205"
+    orcid: 0000-0001-5203-2205
 
-  - name: "Yingzhen Li"
+  - name: Yingzhen Li
     groups:
       - CHAI
-    orcid: "0000-0001-6938-2375"
+    orcid: 0000-0001-6938-2375
 
-  - name: "Kia Nazarpour"
+  - name: Kia Nazarpour
     groups:
       - CHAI
-    orcid: "0000-0003-4217-0254"
+    orcid: 0000-0003-4217-0254
 
-  - name: "Ram Ramamoorthy"
+  - name: Ram Ramamoorthy
     groups:
       - CHAI
-    orcid: "0000-0002-6300-5103"
+    orcid: 0000-0002-6300-5103
 
-  - name: "Eliana Vasquez Osorio"
+  - name: Eliana Vasquez Osorio
     groups:
       - CHAI
-    orcid: "0000-0003-0741-994X"
+    orcid: 0000-0003-0741-994X
 
-  - name: "William Whiteley"
+  - name: William Whiteley
     groups:
       - CHAI
-    orcid: "0000-0002-4816-8991"
+    orcid: 0000-0002-4816-8991
 
-  - name: "Stephanie Riley"
+  - name: Stephanie Riley
     groups:
       - CHAI
-    institution: "University of Manchester"
+    institution: University of Manchester

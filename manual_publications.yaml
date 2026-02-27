@@ -1,15 +1,15 @@
 manual_publications:
-- title: "Causal Ordering for Structure Learning from Time Series"
+- title: Causal Ordering for Structure Learning from Time Series
   authors:
-  - "P.P. Sanchez"
-  - "D. Machlanski"
-  - "S. McDonagh"
-  - "S.A. Tsaftaris"
+  - Pedro Sanchez
+  - Damian Machlanski
+  - Steven McDonagh
+  - Sotirios A. Tsaftaris
   date: "2025-12-07"
-  venue: "Transactions on Machine Learning Research"
+  venue: Transactions on Machine Learning Research
   groups:
   - VIOS
-  url: "https://openreview.net/forum?id=hWuTzqggSd"
+  url: https://openreview.net/forum?id=hWuTzqggSd
 - title: Complementary Time-Frequency Domain Networks for Dynamic Parallel MR Image Reconstruction
   authors:
   - C. Qin

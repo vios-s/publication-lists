@@ -18,10 +18,10 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      WEBSITE_REPO: "vios-s/vios.science"
-      WEBSITE_BRANCH: "main"
-      UPDATE_BRANCH: "publications-update"
-      TARGET_INCLUDE_PATH: "src/data/publications.yaml"
+      WEBSITE_REPO: vios-s/vios.science
+      WEBSITE_BRANCH: main
+      UPDATE_BRANCH: publications-update
+      TARGET_INCLUDE_PATH: src/data/publications.yaml
 
     steps:
       - name: Checkout publication-lists repo
@@ -62,10 +62,10 @@ jobs:
         with:
           path: website
           token: ${{ secrets.WEBSITE_REPO_PAT }}
-          commit-message: "Update publications list"
+          commit-message: Update publications list
           branch: ${{ env.UPDATE_BRANCH }}
           base: ${{ env.WEBSITE_BRANCH }}
-          title: "Update publications"
+          title: Update publications
           body: |
             Automated update of `src/data/publications.yaml` generated from OpenAlex.
 
