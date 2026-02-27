@@ -52,16 +52,70 @@ jobs:
           path: website
           token: ${{ secrets.WEBSITE_REPO_PAT }}
 
-      - name: Copy generated publications list into website repo
+      - name: Merge generated publications preserving existing images
         run: |
           mkdir -p "website/$(dirname "${TARGET_INCLUDE_PATH}")"
-          cp "output/vios_publications.yaml" "website/${TARGET_INCLUDE_PATH}"
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          import yaml
+
+          generated_path = Path("output/vios_publications.yaml")
+          target_path = Path("website/${TARGET_INCLUDE_PATH}")
+
+          def normalize_title(value):
+              if value is None:
+                  return ""
+              value = str(value).strip().lower()
+              return re.sub(r"\s+", " ", value)
+
+          def normalize_date(value):
+              if value is None:
+                  return ""
+              return str(value).strip()
+
+          def publication_key(publication):
+              return f"{normalize_title(publication.get('title'))}|{normalize_date(publication.get('date'))}"
+
+          with generated_path.open("r", encoding="utf-8") as fh:
+              generated_publications = yaml.safe_load(fh) or []
+
+          existing_publications = []
+          if target_path.exists():
+              with target_path.open("r", encoding="utf-8") as fh:
+                  existing_publications = yaml.safe_load(fh) or []
+
+          existing_images = {}
+          for publication in existing_publications:
+              key = publication_key(publication)
+              image = publication.get("image")
+              if image not in (None, ""):
+                  existing_images[key] = image
+
+          preserved_count = 0
+          for publication in generated_publications:
+              key = publication_key(publication)
+              existing_image = existing_images.get(key)
+              if existing_image is not None:
+                  publication["image"] = existing_image
+                  preserved_count += 1
+
+          with target_path.open("w", encoding="utf-8") as fh:
+              yaml.safe_dump(generated_publications, fh, sort_keys=False, allow_unicode=True)
+
+          print(
+              f"Merged {len(generated_publications)} publications; "
+              f"preserved {preserved_count} existing image path(s)."
+          )
+          PY
 
       - name: Create or update PR
         uses: peter-evans/create-pull-request@v8
         with:
           path: website
           token: ${{ secrets.WEBSITE_REPO_PAT }}
+          add-paths: |
+            ${{ env.TARGET_INCLUDE_PATH }}
           commit-message: Update publications list
           branch: ${{ env.UPDATE_BRANCH }}
           base: ${{ env.WEBSITE_BRANCH }}
