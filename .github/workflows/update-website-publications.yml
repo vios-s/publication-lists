@@ -2,9 +2,9 @@ name: Update VIOS website publications (PR)
 
 on:
   workflow_dispatch: {}
-  # schedule:
-  #   # Every ~15 days (twice a month)
-  #   - cron: "0 2 1,16 * *"   # 02:00 UTC on the 1st and 16th
+  schedule:
+    # Every ~15 days (twice a month)
+    - cron: "0 2 1,16 * *"   # 02:00 UTC on the 1st and 16th
 
 permissions:
   contents: read

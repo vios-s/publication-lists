@@ -153,3 +153,24 @@ Schedule with cron:
 # Weekly updates - fetch only recent publications
 0 2 * * 1 cd /path/to/publication-lists && python generate_lists.py --from-year 2020
 ```
+
+### VIOS Website Sync (Cross-Repo Workflow)
+
+This repository also updates the [VIOS website](https://github.com/vios-s/vios.science) repository automatically through the GitHub Actions workflow:
+`.github/workflows/update-website-publications.yml`.
+
+How it works:
+1. Generate `output/vios_publications.yaml` in this repo.
+2. Checkout the website repo inside the workflow.
+3. Merge generated publications into `src/data/publications.yaml` in the website repo.
+4. Preserve existing non-null `image` values from the website file by matching publications on normalized `title + date`.
+5. Open/update a PR in the website repo (`publications-update` branch) with only `src/data/publications.yaml`.
+
+Why this design:
+- Publication content stays generated from this source repo.
+- Image paths can still be maintained manually in the website repo.
+- Review and merge happen in the website repo before publishing changes.
+
+Triggering:
+- Manual: `workflow_dispatch`.
+- Scheduled: 02:00 UTC on the 1st and 16th of each month.
