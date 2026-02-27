@@ -57,12 +57,14 @@ jobs:
           mkdir -p "website/$(dirname "${TARGET_INCLUDE_PATH}")"
           python - <<'PY'
           import os
+          import sys
           from pathlib import Path
           import re
           import yaml
 
           generated_path = Path("output/vios_publications.yaml")
           target_path = Path("website") / os.environ["TARGET_INCLUDE_PATH"]
+          NO_WRAP_WIDTH = sys.maxsize
 
           def normalize_title(value):
               if value is None:
@@ -102,7 +104,13 @@ jobs:
                   preserved_count += 1
 
           with target_path.open("w", encoding="utf-8") as fh:
-              yaml.safe_dump(generated_publications, fh, sort_keys=False, allow_unicode=True)
+              yaml.safe_dump(
+                  generated_publications,
+                  fh,
+                  sort_keys=False,
+                  allow_unicode=True,
+                  width=NO_WRAP_WIDTH,
+              )
 
           print(
               f"Merged {len(generated_publications)} publications; "
