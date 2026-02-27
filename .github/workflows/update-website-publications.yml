@@ -56,12 +56,13 @@ jobs:
         run: |
           mkdir -p "website/$(dirname "${TARGET_INCLUDE_PATH}")"
           python - <<'PY'
+          import os
           from pathlib import Path
           import re
           import yaml
 
           generated_path = Path("output/vios_publications.yaml")
-          target_path = Path("website/${TARGET_INCLUDE_PATH}")
+          target_path = Path("website") / os.environ["TARGET_INCLUDE_PATH"]
 
           def normalize_title(value):
               if value is None:
