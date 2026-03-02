@@ -44,13 +44,22 @@ jobs:
           python generate_lists.py --format yaml --group VIOS
           test -f output/vios_publications.yaml
 
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.WEBSITE_APP_ID }}
+          private-key: ${{ secrets.WEBSITE_APP_PRIVATE_KEY }}
+          owner: vios-s
+          repositories: vios.science
+
       - name: Checkout website repo
         uses: actions/checkout@v4
         with:
           repository: ${{ env.WEBSITE_REPO }}
           ref: ${{ env.WEBSITE_BRANCH }}
           path: website
-          token: ${{ secrets.WEBSITE_REPO_PAT }}
+          token: ${{ steps.app-token.outputs.token }}
 
       - name: Merge generated publications preserving existing image/code fields
         run: |
@@ -132,7 +141,7 @@ jobs:
         uses: peter-evans/create-pull-request@v8
         with:
           path: website
-          token: ${{ secrets.WEBSITE_REPO_PAT }}
+          token: ${{ steps.app-token.outputs.token }}
           add-paths: |
             ${{ env.TARGET_INCLUDE_PATH }}
           commit-message: Update publications list
