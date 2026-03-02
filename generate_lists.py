@@ -309,6 +309,7 @@ class ListGenerator:
         print(f"  Groups in data: {', '.join(metadata.get('groups', []))}")
 
         for paper in data.get("publications", []):
+            paper["venue"] = self._apply_venue_overrides(paper.get("venue"))
             paper["raw_data"] = {}
             self.publications[self._get_paper_key(paper)] = paper
 
@@ -570,11 +571,11 @@ class ListGenerator:
     ) -> Dict:
         return {
             "doi": doi,
-            "title": title,
+            "title": self._normalize_text(title) or "",
             "year": year,
             "publication_date": publication_date,
-            "authors": authors,
-            "venue": venue,
+            "authors": [self._normalize_text(author) or "" for author in authors],
+            "venue": self._apply_venue_overrides(self._normalize_text(venue)),
             "url": url,
             "citation_count": citation_count,
             "type": work_type,
@@ -618,43 +619,11 @@ class ListGenerator:
             print(f"    Warning: Failed to parse OpenAlex work: {e}")
             return None
 
-    def _extract_orcid_from_result(result: Dict) -> str:
-        uri = result.get("orcid-identifier", {}).get("uri", "")
-        return uri.replace("https://orcid.org/", "")
-
     def _extract_venue(self, work: Dict) -> Optional[str]:
         location = work.get("primary_location") or {}
         source = location.get("source") or {}
-        return source.get("display_name") or location.get("raw_source_name")
-
-    def _should_prefer_over(self, paper: Dict, existing: Dict) -> bool:
-        paper_venue = (paper.get("venue") or "").lower()
-        existing_venue = (existing.get("venue") or "").lower()
-
-        paper_is_arxiv = "arxiv" in paper_venue or "cornell university" in paper_venue
-        existing_is_arxiv = (
-            "arxiv" in existing_venue or "cornell university" in existing_venue
-        )
-
-        paper_type = paper.get("type", "")
-        existing_type = existing.get("type", "")
-        paper_is_preprint = paper_type == "preprint"
-        existing_is_preprint = existing_type == "preprint"
-
-        # Prefer non-preprint over preprint
-        if not paper_is_preprint and existing_is_preprint:
-            return True
-        if paper_is_preprint and not existing_is_preprint:
-            return False
-
-        # Prefer non-arXiv over arXiv
-        if not paper_is_arxiv and existing_is_arxiv:
-            return True
-        if paper_is_arxiv and not existing_is_arxiv:
-            return False
-
-        # If both are arXiv or both are not, prefer more complete info
-        return len(str(paper)) > len(str(existing))
+        raw_venue = source.get("display_name") or location.get("raw_source_name")
+        return self._apply_venue_overrides(raw_venue)
 
     def _get_paper_key(self, paper: Dict) -> str:
         doi = paper.get("doi")
@@ -717,15 +686,6 @@ class ListGenerator:
 
             self.author_name_map[canonical_name] = canonical_name
 
-    def _clean_raw_author_name(self, raw_name: str) -> str:
-        if not raw_name:
-            return ""
-        if "," in raw_name:
-            parts = [part.strip() for part in raw_name.split(",", 1)]
-            if len(parts) == 2 and parts[1]:
-                return f"{parts[1]} {parts[0]}"
-        return raw_name
-
     def _resolve_author_name(self, authorship: Dict) -> str:
         display_name = authorship.get("author", {}).get("display_name", "")
         raw_name = authorship.get("raw_author_name", "")
@@ -743,26 +703,6 @@ class ListGenerator:
             return canonical_from_display
 
         return display_name or cleaned_raw or raw_name
-
-    def _normalize_title(self, title: str) -> str:
-        if not title:
-            return ""
-        normalized = " ".join(title.lower().split())
-        return normalized
-
-    def _load_yaml_list(self, filepath: str, key: str) -> list:
-        if not os.path.exists(filepath):
-            return []
-        try:
-            with open(filepath, "r") as file:
-                data = yaml.safe_load(file)
-                if data and key in data:
-                    items = data[key]
-                    print(f"  Loaded {len(items)} {key} from {filepath}")
-                    return items
-        except Exception as e:
-            print(f"  Warning: Could not load {filepath}: {e}")
-        return []
 
     def _load_excluded_dois(self):
         dois = self._load_yaml_list(self.exclusion_file, "excluded_dois")
@@ -861,7 +801,91 @@ class ListGenerator:
 
         print(f"  Wrote {len(publications)} publications to {filename}")
 
-    def _get_date_sort_key(self, publication: Dict):
+    @staticmethod
+    def _normalize_text(value: Optional[str]) -> Optional[str]:
+        if value is None:
+            return None
+        return value.replace("\u00a0", " ")
+
+    @staticmethod
+    def _extract_orcid_from_result(result: Dict) -> str:
+        uri = result.get("orcid-identifier", {}).get("uri", "")
+        return uri.replace("https://orcid.org/", "")
+
+    @staticmethod
+    def _apply_venue_overrides(venue: Optional[str]) -> Optional[str]:
+        if not venue:
+            return venue
+        venue_overrides = {
+            "arxiv (cornell university)": "arXiv",
+            "arxiv.org": "arXiv",
+        }
+        return venue_overrides.get(venue.strip().lower(), venue)
+
+    @staticmethod
+    def _should_prefer_over(paper: Dict, existing: Dict) -> bool:
+        paper_venue = (paper.get("venue") or "").lower()
+        existing_venue = (existing.get("venue") or "").lower()
+
+        paper_is_arxiv = "arxiv" in paper_venue or "cornell university" in paper_venue
+        existing_is_arxiv = (
+            "arxiv" in existing_venue or "cornell university" in existing_venue
+        )
+
+        paper_type = paper.get("type", "")
+        existing_type = existing.get("type", "")
+        paper_is_preprint = paper_type == "preprint"
+        existing_is_preprint = existing_type == "preprint"
+
+        # Prefer non-preprint over preprint
+        if not paper_is_preprint and existing_is_preprint:
+            return True
+        if paper_is_preprint and not existing_is_preprint:
+            return False
+
+        # Prefer non-arXiv over arXiv
+        if not paper_is_arxiv and existing_is_arxiv:
+            return True
+        if paper_is_arxiv and not existing_is_arxiv:
+            return False
+
+        # If both are arXiv or both are not, prefer more complete info
+        return len(str(paper)) > len(str(existing))
+
+    @staticmethod
+    def _clean_raw_author_name(raw_name: str) -> str:
+        if not raw_name:
+            return ""
+        if "," in raw_name:
+            parts = [part.strip() for part in raw_name.split(",", 1)]
+            if len(parts) == 2 and parts[1]:
+                return f"{parts[1]} {parts[0]}"
+        return raw_name
+
+    @staticmethod
+    def _normalize_title(title: str) -> str:
+        if not title:
+            return ""
+        normalized = " ".join(title.lower().split())
+        return normalized
+
+    @staticmethod
+    def _load_yaml_list(filepath: str, key: str) -> list:
+        if not os.path.exists(filepath):
+            return []
+        try:
+            with open(filepath, "r") as file:
+                data = yaml.safe_load(file)
+                if data and key in data:
+                    items = data[key]
+                    print(f"  Loaded {len(items)} {key} from {filepath}")
+                    return items
+        except Exception as e:
+            print(f"  Warning: Could not load {filepath}: {e}")
+        return []
+
+    @staticmethod
+    def _get_date_sort_key(publication: Dict):
         date_str = publication.get("publication_date") or "0000-00-00"
         return -int(date_str.replace("-", ""))
 
