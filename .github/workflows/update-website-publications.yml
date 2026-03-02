@@ -52,7 +52,7 @@ jobs:
           path: website
           token: ${{ secrets.WEBSITE_REPO_PAT }}
 
-      - name: Merge generated publications preserving existing images
+      - name: Merge generated publications preserving existing image/code fields
         run: |
           mkdir -p "website/$(dirname "${TARGET_INCLUDE_PATH}")"
           python - <<'PY'
@@ -89,19 +89,28 @@ jobs:
                   existing_publications = yaml.safe_load(fh) or []
 
           existing_images = {}
+          existing_codes = {}
           for publication in existing_publications:
               key = publication_key(publication)
               image = publication.get("image")
+              code = publication.get("code")
               if image not in (None, ""):
                   existing_images[key] = image
+              if code not in (None, ""):
+                  existing_codes[key] = code
 
           preserved_count = 0
+          preserved_code_count = 0
           for publication in generated_publications:
               key = publication_key(publication)
               existing_image = existing_images.get(key)
+              existing_code = existing_codes.get(key)
               if existing_image is not None:
                   publication["image"] = existing_image
                   preserved_count += 1
+              if existing_code is not None:
+                  publication["code"] = existing_code
+                  preserved_code_count += 1
 
           with target_path.open("w", encoding="utf-8") as fh:
               yaml.safe_dump(
@@ -114,7 +123,8 @@ jobs:
 
           print(
               f"Merged {len(generated_publications)} publications; "
-              f"preserved {preserved_count} existing image path(s)."
+              f"preserved {preserved_count} existing image path(s); "
+              f"preserved {preserved_code_count} existing code link(s)."
           )
           PY
 
