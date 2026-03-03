@@ -61,7 +61,7 @@ jobs:
           path: website
           token: ${{ steps.app-token.outputs.token }}
 
-      - name: Merge generated publications preserving existing image/code fields
+      - name: Merge generated publications preserving existing extra fields
         run: |
           mkdir -p "website/$(dirname "${TARGET_INCLUDE_PATH}")"
           python - <<'PY'
@@ -97,29 +97,29 @@ jobs:
               with target_path.open("r", encoding="utf-8") as fh:
                   existing_publications = yaml.safe_load(fh) or []
 
-          existing_images = {}
-          existing_codes = {}
+          existing_by_key = {}
           for publication in existing_publications:
               key = publication_key(publication)
-              image = publication.get("image")
-              code = publication.get("code")
-              if image not in (None, ""):
-                  existing_images[key] = image
-              if code not in (None, ""):
-                  existing_codes[key] = code
+              if key != "|":
+                  existing_by_key[key] = publication
 
-          preserved_count = 0
-          preserved_code_count = 0
+          preserved_fields = 0
+          matched_publications = 0
           for publication in generated_publications:
               key = publication_key(publication)
-              existing_image = existing_images.get(key)
-              existing_code = existing_codes.get(key)
-              if existing_image is not None:
-                  publication["image"] = existing_image
-                  preserved_count += 1
-              if existing_code is not None:
-                  publication["code"] = existing_code
-                  preserved_code_count += 1
+              existing_publication = existing_by_key.get(key)
+              if not existing_publication:
+                  continue
+
+              matched_publications += 1
+
+              # Generated publication fields are authoritative. Preserve any
+              # additional fields that only exist in the website repo, e.g.
+              # image, code, pdf, notes, etc.
+              for field, value in existing_publication.items():
+                  if field not in publication:
+                      publication[field] = value
+                      preserved_fields += 1
 
           with target_path.open("w", encoding="utf-8") as fh:
               yaml.safe_dump(
@@ -132,8 +132,8 @@ jobs:
 
           print(
               f"Merged {len(generated_publications)} publications; "
-              f"preserved {preserved_count} existing image path(s); "
-              f"preserved {preserved_code_count} existing code link(s)."
+              f"matched {matched_publications} existing publication(s); "
+              f"preserved {preserved_fields} existing extra field value(s)."
           )
           PY
 

@@ -4,7 +4,5 @@
   authors: {{ publication.authors | join(', ') | toyaml }}
   venue: {{ publication.venue | toyaml }}
   date: {{ date | toyaml }}
-  image: null
-  code: null
   website: {{ publication.url | toyaml }}
 {% endfor %}
