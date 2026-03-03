@@ -113,9 +113,6 @@ jobs:
 
               matched_publications += 1
 
-              # Generated publication fields are authoritative. Preserve any
-              # additional fields that only exist in the website repo, e.g.
-              # image, code, pdf, notes, etc.
               for field, value in existing_publication.items():
                   if field not in publication:
                       publication[field] = value
