@@ -606,7 +606,7 @@ class ListGenerator:
                 publication_date=work.get("publication_date"),
                 authors=authors,
                 venue=venue,
-                url=work.get("doi") or work.get("id", ""),
+                url=self._get_openalex_work_url(work),
                 citation_count=work.get("cited_by_count", 0),
                 work_type=work_type,
                 source="openalex",
@@ -888,6 +888,25 @@ class ListGenerator:
     def _get_date_sort_key(publication: Dict):
         date_str = publication.get("publication_date") or "0000-00-00"
         return -int(date_str.replace("-", ""))
+
+    @staticmethod
+    def _get_openalex_work_url(work: Dict) -> str:
+        if work.get("doi"):
+            return work["doi"]
+
+        locations = [
+            work.get("primary_location"),
+            work.get("best_oa_location"),
+            *work.get("locations", []),
+        ]
+        for location in locations:
+            if not location:
+                continue
+            landing_page_url = location.get("landing_page_url")
+            if landing_page_url:
+                return landing_page_url
+
+        return work.get("id", "")
 
 
 def main():
