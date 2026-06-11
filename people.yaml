@@ -71,6 +71,8 @@ members:
       - CHAI
     institution: University of Edinburgh
     orcid: 0000-0002-1520-4909
+    aliases:
+      - Kurt; id_orcid 0000-0002-1520-4909 Butler
 
   - name: Panos Dimitrakopoulos
     groups:

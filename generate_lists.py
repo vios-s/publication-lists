@@ -310,6 +310,10 @@ class ListGenerator:
 
         for paper in data.get("publications", []):
             paper["venue"] = self._apply_venue_overrides(paper.get("venue"))
+            paper["authors"] = [
+                self.author_name_map.get(author, author)
+                for author in paper.get("authors", [])
+            ]
             paper["raw_data"] = {}
             self.publications[self._get_paper_key(paper)] = paper
 
@@ -378,6 +382,7 @@ class ListGenerator:
         print("=" * 60)
 
         if self.render_only:
+            self.load_config()
             self.load_data()
         else:
             self.load_config()
@@ -685,6 +690,12 @@ class ListGenerator:
                 continue
 
             self.author_name_map[canonical_name] = canonical_name
+            for alias in member.get("aliases", []):
+                if alias:
+                    self.author_name_map[alias] = canonical_name
+                    self.author_name_map[self._clean_raw_author_name(alias)] = (
+                        canonical_name
+                    )
 
     def _resolve_author_name(self, authorship: Dict) -> str:
         display_name = authorship.get("author", {}).get("display_name", "")
