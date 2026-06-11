@@ -74,6 +74,7 @@ jobs:
           generated_path = Path("output/vios_publications.yaml")
           target_path = Path("website") / os.environ["TARGET_INCLUDE_PATH"]
           NO_WRAP_WIDTH = sys.maxsize
+          PRESERVED_OVERRIDE_FIELDS = {"website"}
 
           def normalize_title(value):
               if value is None:
@@ -114,7 +115,7 @@ jobs:
               matched_publications += 1
 
               for field, value in existing_publication.items():
-                  if field not in publication:
+                  if field in PRESERVED_OVERRIDE_FIELDS or field not in publication:
                       publication[field] = value
                       preserved_fields += 1
 
