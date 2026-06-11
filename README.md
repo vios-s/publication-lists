@@ -61,6 +61,8 @@ members:
       - VIOS  # Can belong to multiple groups
     orcid: 0000-0000-0000-0000  # Recommended for accuracy
     institution: University Name  # Optional, helps ORCID lookup
+    aliases:  # Optional, maps known OpenAlex name variants to this canonical name
+      - Researcher Name Variant
     required_collaborators:  # Optional, additional per-member requirements
       - Specific Advisor
 ```
@@ -68,6 +70,7 @@ members:
 **Key points:**
 - ORCID is highly recommended for accurate matching
 - Script auto-attempts ORCID lookup if missing
+- `aliases` can correct known OpenAlex author-name variants to the member's canonical `name`
 - Collaborator requirements combine group + member level
 - Empty `required_collaborators: []` means no filtering
 
